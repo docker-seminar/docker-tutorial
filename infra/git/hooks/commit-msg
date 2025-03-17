@@ -27,10 +27,10 @@ if [[ $branch_name =~ ^[a-z]+/[0-9]+$ ]]; then
         #Get the body (skipping the first line)
         body=$(tail -n + 2 "$commit_msg_file")
         # Add a reference to the issue at the end of the body
-        echo -e "$subject\n$body\n#issue_number" > "$commit_msg_file"
+        echo -e "$subject\n$body\n\n#$issue_number" > "$commit_msg_file"
     else
       # No body, so add one with the issue reference
-      echo -e "$subject\n#$issue_number" > "$commit_msg_file"
+      echo -e "$subject\n\n#$issue_number" > "$commit_msg_file"
     fi
   fi
 else
