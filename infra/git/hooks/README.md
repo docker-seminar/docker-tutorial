@@ -45,3 +45,12 @@ This hook enforces commit message convention by:
 - Extracting the issue number from branch names following the pattern `[category]/[issue_number]`.
 - Automatically adding the issue number to commit messages if not already present.
 - Skipping the check for branches that don't follow the naming convention.
+
+### pre-push
+
+This hook ensures your branch is up to date with the main branch before pushing:
+
+- Fetches the latest changes from the main branch.
+- Checks if your current branch is behind `main` branch.
+- Prevents pushing if your branch is outdated, prompting you to rebase or merge.
+- Allows push to proceed if your branch is up to date.
