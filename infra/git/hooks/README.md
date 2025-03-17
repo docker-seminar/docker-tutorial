@@ -18,7 +18,7 @@ Before using the hooks included in this repository, you need to follow some setu
 You can change the location of Git hooks using the `core.hooksPath` configuration option.
 This allows you to store hooks in a directory that can be version-controlled and shared across teams.
 
-### Steps to set a Custom Hooks Directory[README.md](README.md)
+### Steps to set a Custom Hooks Directory
 
 1. Configure Git to use this directory:
    ```bash
