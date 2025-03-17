@@ -1,0 +1,82 @@
+name: Issue Quality Check
+on:
+  issues:
+    types: [ opened , edited ]
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Issue Title Pattern
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueTitle = context.payload.issue.title || ''
+            
+            const allowedKeywords = [ 'feat', 'fix', 'refactor', 'chore', 'docs', 'test', 'style', 'perf', 'revert' ]
+            
+            const keywordPattern = allowedKeywords.join('|')
+            const titleRegex = new RegExp(`^(${keywordPattern})\$begin:math:text$[^)]*\\$end:math:text$: [A-Z].*`)
+
+            if (titleRegex.test(issueTitle)) {
+              core.setOutput('error', '')
+              return
+            }
+
+            const errorMessage = '- Issue title "${issueTitle}" does not match the format: <keyword>(<scope>): <Title>`
+            core.setOutput('error', errorMessage)
+            core.setFailed(errorMessage)
+
+      - name: Validate Assignee and Labels
+        id: check_assignee_labels
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue
+            const assignees = issue.assignees || []
+            const labels = issue.labels || []
+
+            const errors = []
+
+            if (assignees.length === 0) {
+              errors.push('- Issue has no assignees.')
+            }
+
+            if (labels.length === 0) {
+              errors.push('- Issue has no labels.')
+            }
+
+            if (errors.length > 0) {
+              const errorMessage = errors.join('\n')
+              core.setOutput('error', errorMessage)
+              core.setFailed(errorMessage)
+            } else {
+              core.setOutput('error', '')
+            }
+
+      - name: Post Follow-up Comment
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { number } = context.payload.issue
+            
+            const titleError = `${{ steps.check_title.outputs.error }}`
+            const metadataErrors `${{ steps.check_assignee_labels.outputs.error }}`
+            
+            let errorDetails = [ titleError, metadataErrors ].filter(Boolean).join('\n')
+            
+            const message = `
+            > [!WARNING]
+            > There are issues that need attention:
+
+            ${errorDetails}
+            
+            Please update the issue accordingly. Thanks!`
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: message.trim()
+            })
