@@ -9,7 +9,10 @@ BASE_BRANCH="main"
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 # Fetch the latest changes from the remote without modifying the working tree
-git fetch "$remote" "$BASE_BRANCH"
+if ! git fetch "$remote" "$BASE_BRANCH"; then
+    echo "❌ Error: Failed to fetch from remote. Check your network connection and authentication."
+    echo "⚠️ Continuing with push, but you might be working with outdated information."
+fi
 
 # Get the latest commit hashes
 LATEST_MAIN_REMOTE=$(git rev-parse --verify "$remote/$BASE_BRANCH" 2>/dev/null)
