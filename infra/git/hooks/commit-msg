@@ -18,8 +18,20 @@ if [[ $branch_name =~ ^[a-z]+/[0-9]+$ ]]; then
 
   # Check if the commit message already mentions the issue number.
   if ! grep -q "$issue_number" <<< "$commit_msg"; then
-    # Add the issue number to the beginning of the commit message.
-    echo -e "$commit_msg\n#$issue_number" > "$commit_msg_file"
+    # Add the issue number to the commit message body.
+    # Split the commit message into subject and body
+    subject=$(head -n 1 "$commit_msg_file")
+
+    # Check if there's a body (more than one line)
+    if [ "$(wc -l < "$commit_msg_file")" -gt 1 ]; then
+        #Get the body (skipping the first line)
+        body=$(tail -n + 2 "$commit_msg_file")
+        # Add a reference to the issue at the end of the body
+        echo -e "$subject\n$body\n#issue_number" > "$commit_msg_file"
+    else
+      # No body, so add one with the issue reference
+      echo -e "$subject\n#$issue_number" > "$commit_msg_file"
+    fi
   fi
 else
   # Skip if branch name doesn't match the convention
