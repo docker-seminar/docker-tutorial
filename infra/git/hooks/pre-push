@@ -1,0 +1,26 @@
+#!/bin/bash
+
+remote="$1"
+
+# Define the base branch (main)
+BASE_BRANCH="main"
+
+# Get the current branch name
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Fetch the latest changes from the remote without modifying the working tree
+git fetch "$remote" "$BASE_BRANCH"
+
+# Get the latest commit hashes
+LATEST_MAIN_REMOTE=$(git rev-parse --verify "$remote/$BASE_BRANCH" 2>/dev/null)
+LATEST_MAIN_LOCAL=$(git merge-base HEAD "$LATEST_MAIN_REMOTE")
+
+# Check if the current branch is behind main
+if [ "$LATEST_MAIN_REMOTE" != "$LATEST_MAIN_LOCAL" ]; then
+    echo "❌ Error: Your branch '$CURRENT_BRANCH' is outdated."
+    echo "🔄 Please rebase or merge the latest changes from '$BASE_BRANCH' before pushing."
+    exit 1
+fi
+
+echo "✅ Your branch '$CURRENT_BRANCH' is up to date with '$BASE_BRANCH'. Proceeding with push."
+exit 0
