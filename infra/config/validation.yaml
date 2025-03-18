@@ -15,7 +15,7 @@ allowed_keywords:
     scopes: [ Performance ]
     example: "refactor(Performance): Remove unnecessary validation logic"
   - name: chore
-    description: General maintenance tasks (e.g.,dependencies, configs)
+    description: General maintenance tasks (e.g., dependencies, configs)
     requires_scope: true
     scopes: [ Dependencies, Configs ]
     example: "chore(Dependencies): Bump TypeScript version"

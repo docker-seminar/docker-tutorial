@@ -1,0 +1,78 @@
+name: PR Title Check
+on:
+  pull_request:
+    types: [ opened, edited ]
+permissions:
+  pull-requests: write
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  validate-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Read allowed keywords and rules from YAML
+        id: read-keywords
+        uses: mikefarah/yq@v4
+        with:
+          cmd: yq '.allowed_keywords' infra/config/validation.yaml -o=json
+      - name: Validate PR title
+        id: validate
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          ALLOWED_KEYWORDS_JSON: ${{ steps.read-keywords.outputs.stdout }}
+        run: |
+          echo "Validating PR title: $PR_TITLE"
+          
+          # Extract keyword, scope, and description from the PR title
+          PR_PATTERN="^([a-z]+)(?:\(([^)]+)\))?: (.+)$"
+          if [[ ! "$PR_TITLE" =~ $PR_PATTERN ]]; then
+            echo "::error::Invalid PR title format. Expected <type>(<scope>): <description>"
+            exit 1
+          fi
+          PR_KEYWORD="${BASH_REMATCH[1]}"
+          PR_SCOPE="${BASH_REMATCH[2]}"
+          PR_DESCRIPTION="${BASH_REMATCH[3]}"
+          
+          echo "Keyword: $PR_KEYWORD"
+          echo "Scope: $PR_SCOPE"
+          echo "Description: $PR_DESCRIPTION"
+          
+          # Parse JSON from validation.yaml
+          ALLOWED_KEYWORDS=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r '.[].name')
+          if ! echo "$ALLOWED_KEYWORDS" | grep -qw "$PR_KEYWORD"; then
+            echo "::error::Invalid PR keyword: '$PR_KEYWORD'. Allowed: $ALLOWED_KEYWORDS"
+            exit 1
+          fi
+          
+          # Check if the keyword required a scope
+          REQUIRES_SCOPE=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg key "$PR_KEYWORD" '.[] | select(.name == $key) | .requires_scope')
+
+          if [[ "$REQUIRES_SCOPE" == "true" && -z "$PR_SCOPE" ]]; then
+            echo "::error::PR title must include a scope for '$PR_KEYWORD'."
+            exit 1
+          fi
+          
+          # Validate scope if provided
+          if [[ -n "$PR_SCOPE" ]]; then
+            VALID_SCOPES=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg key "$PR_KEYWORD" '.[] | select(.name == $key) | .scopes[]')
+            if ! echo "$VALID_SCOPES" | grep -qw "$PR_SCOPE"; then
+              echo "::error::Invalid scope '$PR_SCOPE' for '$PR_KEYWORD'. Allowed scopes: $VALID_SCOPES"
+              echo "INVALID_SCOPE=1" >> $GITHUB_ENV
+              echo "VALID_SCOPES='$VALID_SCOPES'" >> $GITHUB_ENV
+              exit 1  # Still fail the workflow
+            fi
+          fi
+          
+          echo "::notice::PR title is valid!"
+      - name: Comment on PR if scope is invalid
+        if: env.INVALID_SCOPE == '1'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
+          > **PR Scope Warning**
+          The scope \`$PR_SCOPE\` is not an allowed scope for \`$PR_KEYWORD\`.
+          **Allowed scopes:** $VALID_SCOPES
+          
+          > [!TIP]
+          > If this scope should be valid, update \`infra/config/validation.yaml\`."
