@@ -62,7 +62,13 @@ jobs:
           done
           
           if [[ $INVALID_COMMITS -gt 0 || $MISSING_ISSUE_NUMBER -gt 0 ]]; then
-            COMMENT_BODY="👋 **@${PR_AUTHOR}, there are issues with your commit messages in this PR:**\n$COMMENT_BODY"
+            COMMENT_BODY=$(cat <<EOF
+            👋 **@${PR_AUTHOR}, there are issues with your commit messages in this PR:**
+          
+            $COMMENT_BODY
+            EOF
+            )
+
             gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
             exit 1
           fi
