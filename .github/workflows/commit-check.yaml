@@ -45,7 +45,7 @@ jobs:
           MISSING_ISSUE_NUMBER=0
           COMMENT_BODY=""
           
-          for commit in $(git log --format="%H" origin/main..HEAD); do
+          for commit in $(git rev-list --no-merges origin/main..HEAD); do          
             MESSAGE=$(git log --format="%s%n%n%b" -n 1 $commit)
             
             # Check commit message format
