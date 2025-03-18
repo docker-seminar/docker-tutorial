@@ -50,7 +50,7 @@ jobs:
             
             # Check commit message format
             if [[ ! $(echo "$MESSAGE" | head -n 1) =~ $ALLOWED_KEYWORDS ]]; then
-              COMMENT_BODY+="> [!WARNING]\n> **Invalid commit message format:**\n\`$MESSAGE\`\n"
+              COMMENT_BODY+="**Invalid commit message format:**\n\`$MESSAGE\`\n"
               INVALID_COMMITS=$((INVALID_COMMITS+1))
             fi
           
@@ -63,7 +63,8 @@ jobs:
           
           if [[ $INVALID_COMMITS -gt 0 || $MISSING_ISSUE_NUMBER -gt 0 ]]; then
             COMMENT_BODY=$(cat <<EOF
-          👋 **@${PR_AUTHOR}, there are issues with your commit messages in this PR:**
+          > [!WARNING]
+          > 👋 **@${PR_AUTHOR}, there are issues with your commit messages in this PR:**
           
           $COMMENT_BODY
           EOF
