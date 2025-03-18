@@ -26,7 +26,7 @@ jobs:
           echo "Validating PR title: $PR_TITLE"
           
           # Extract keyword, scope, and description from the PR title
-          PR_PATTERN="^([a-z]+)(?:\(([^)]+)\))?: (.+)$"
+          PR_PATTERN="^([a-z]+)(?:\(([A-Za-z0-9/-]+)\))?: (.+)$"
           if [[ ! "$PR_TITLE" =~ $PR_PATTERN ]]; then
             echo "::error::Invalid PR title format. Expected <type>(<scope>): <description>"
             exit 1
