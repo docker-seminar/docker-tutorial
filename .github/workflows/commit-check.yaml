@@ -34,7 +34,7 @@ jobs:
       - name: Check Commit Messages
         run: |
           branch_name="${{ env.branch_name }}"
-          issue_Number=$(echo "$branch_name" | cut -d '/' -f 2)
+          issue_number=$(echo "$branch_name" | cut -d '/' -f 2)
           PR_NUMBER=${{ github.event.pull_request.number }}
           PR_AUTHOR=${{ github.event.pull_request.user.login }}
 
