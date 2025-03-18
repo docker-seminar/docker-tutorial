@@ -50,13 +50,13 @@ jobs:
             
             # Check commit message format
             if [[ ! $(echo "$MESSAGE" | head -n 1) =~ $ALLOWED_KEYWORDS ]]; then
-              COMMENT_BODY+="**Invalid commit message format:**\n\`$MESSAGE\`\n"
+              COMMENT_BODY+=$(printf "**Invalid commit message format:**\n\`%s\`\n\n" "$MESSAGE")
               INVALID_COMMITS=$((INVALID_COMMITS+1))
             fi
           
             # Check if commit message references issue number
             if ! grep -q "#$issue_number" <<< "$MESSAGE"; then
-              COMMENT_BODY+="> [!WARNING]\n> **Commit missing issue number:**\n\`$MESSAGE\`\nExpected: Should include \`#$issue_number\`\n"
+              COMMENT_BODY+=$(printf "Commit missing issue number reference:**\n\`%s\`\n\n" "$MESSAGE")
               MISSING_ISSUE_NUMBER=$((MISSING_ISSUE_NUMBER+1))
             fi
           done
