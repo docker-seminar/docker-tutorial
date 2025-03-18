@@ -54,6 +54,8 @@ jobs:
               INVALID_COMMITS=$((INVALID_COMMITS+1))
             fi
           
+            COMMENT_BODY="$COMMENT_BODY"$'\n'
+
             # Check if commit message references issue number
             if ! grep -q "#$issue_number" <<< "$MESSAGE"; then
               COMMENT_BODY+=$(printf -- "- **Commit missing issue number reference (Commit ID: %s):**\n\`%s\`\n\n" "$commit" "$MESSAGE")
