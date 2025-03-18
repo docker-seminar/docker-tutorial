@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Get the current commit message
+commit_msg_file=$1
+if [ ! -f "$commit_msg_file" ] || [ ! -r "$commit_msg_file" ]; then
+  echo "Error: Cannot read commit message file"
+  exit 1
+fi
+commit_msg=$(cat "$commit_msg_file")
+
 # Get the branch name.
 branch_name=$(git symbolic-ref --short HEAD 2>/dev/null)
 
@@ -7,14 +15,6 @@ branch_name=$(git symbolic-ref --short HEAD 2>/dev/null)
 if [[ $branch_name =~ ^[a-z]+/[0-9]+$ ]]; then
   # Extract issue number from branch name
   issue_number=$(echo "$branch_name" | cut -d '/' -f 2)
-
-  # Get the current commit message
-  commit_msg_file=$1
-  if [ ! -f "$commit_msg_file" ] || [ ! -r "$commit_msg_file" ]; then
-    echo "Error: Cannot read commit message file"
-    exit 1
-  fi
-  commit_msg=$(cat "$commit_msg_file")
 
   # Check if the commit message already mentions the issue number.
   if ! grep -q "$issue_number" <<< "$commit_msg"; then
@@ -37,3 +37,136 @@ else
   # Skip if branch name doesn't match the convention
   echo "Branch name does not follow the pattern [category]/[issue_number]. Skip issue number check."
 fi
+
+# Determine the repository root
+repo_root=$(git rev-parse --show-toplevel)
+
+# Configuration file location
+validation_yaml="$repo_root/infra/config/validation.yaml"
+
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+if ! command_exists yq; then
+  echo "yq is not installed. Installing..."
+
+  if command_exists brew; then
+    brew install yq
+  elif command_exists apt; then
+    sudo apt update && sudo apt install -y yq
+  elif command_exists yum; then
+    sudo yum instlal -y yq
+  elif command_exists apk; then
+    apk add --no-cache yq
+  else
+    echo "Error: No compatible package manager found. Please install yq manually."
+    exit 1
+  fi
+fi
+
+echo "yq is installed."
+
+# Extract the first line (title)
+commit_title=$(echo "$commit_msg" | head -n 1)
+
+# Extract keyword, scope, and description from the commit title
+COMMIT_PATTERN='^([a-z]+)(\([A-Za-z0-9]+\))?: (.+)$'
+
+echo "Validating commit title: $commit_title"
+
+# Check if commit title matches the full pattern
+if [[ ! "$commit_title" =~ $COMMIT_PATTERN ]]; then
+  echo "❌ Invalid commit message format! Expected: <type>(<scope>): <description>"
+
+  # Debugging: Check where it failed
+  if ! [[ "$commit_title" =~ ^[a-z]+ ]]; then
+    echo "🔍 Error: The keyword is missing or not lowercase."
+  fi
+
+  if ! [[ "$commit_title" =~ \(([A-Za-z0-9/-]+)\) ]]; then
+    echo "🔍 Error: Scope is missing or has invalid characters."
+  fi
+
+  if ! [[ "$commit_title" =~ :\  ]]; then
+    echo "🔍 Error: The colon separator is missing or incorrect."
+  fi
+
+  if ! [[ "$commit_title" =~ :\ (.+)$ ]]; then
+    echo "🔍 Error: Description is missing after ':'."
+  fi
+
+  exit 1
+fi
+
+# Debugging: Show extracted values
+COMMIT_KEYWORD="${BASH_REMATCH[1]}"
+COMMIT_SCOPE_RAW="${BASH_REMATCH[2]}"  # e.g. "(Git)"
+COMMIT_DESCRIPTION="${BASH_REMATCH[3]}"
+
+# Use parameter expansion to remove '(' and ')'
+COMMIT_SCOPE="${COMMIT_SCOPE_RAW#(}"   # e.g. "Git)"
+COMMIT_SCOPE="${COMMIT_SCOPE%)}"       # e.g. "Git"
+
+echo "Keyword: $COMMIT_KEYWORD"
+echo "Scope: $COMMIT_SCOPE"
+echo "Description: $COMMIT_DESCRIPTION"
+
+# Confirm the keyword exists.
+keyword_exists="$(
+  yq e ".allowed_keywords[] | select(.name == \"$COMMIT_KEYWORD\") | .name" \
+  "$validation_yaml"
+)"
+
+if [[ -z "$keyword_exists" ]]; then
+  echo "❌ Invalid keyword: $COMMIT_KEYWORD"
+
+  # Print out the list of all allowed keywords as comma-separated on one line
+  allowed_keywords="$(
+    yq e '.allowed_keywords[].name' "$validation_yaml" \
+    | paste -sd ',' -
+  )"
+
+  echo "✅ Allowed keywords are: $allowed_keywords"
+
+  exit 1
+fi
+
+# Check requires_scope
+keyword_requires_scope="$(
+  yq e ".allowed_keywords[] | select(.name == \"$COMMIT_KEYWORD\") | .requires_scope" \
+    "$validation_yaml"
+)"
+
+if [[ "$keyword_requires_scope" == "true" ]]; then
+  if [[ -z "$COMMIT_SCOPE" ]]; then
+    echo "❌ The keyword '$COMMIT_KEYWORD' requires a scope, but none was provided."
+    exit 1
+  fi
+
+  # Check allowed scopes
+  allowed_scopes="$(
+    yq e ".allowed_keywords[] | select(.name == \"$COMMIT_KEYWORD\") | .scopes[]" "$validation_yaml"
+  )"
+
+  allowed_scopes_csv="$(
+    echo "$allowed_scopes" \
+    | paste -sd ',' -
+  )"
+
+  if ! echo "$allowed_scopes" | grep -qx "$COMMIT_SCOPE"; then
+    echo "❌ Scope '$COMMIT_SCOPE' is not in the allowed scopes for '$COMMIT_KEYWORD'."
+    echo "✅ Allowed scopes are:"
+    echo "$allowed_scopes_csv"
+    exit 1
+  fi
+
+else # requires_scope == "false"
+  if [[ -n "$COMMIT_SCOPE" ]]; then
+    echo "❌ The keyword '$COMMIT_KEYWORD' does not allow a scope, but one was provided ($COMMIT_SCOPE)."
+    exit 1
+  fi
+fi
+
+echo "✅ Valid commit message!"
