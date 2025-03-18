@@ -56,17 +56,17 @@ jobs:
           
             # Check if commit message references issue number
             if ! grep -q "#$issue_number" <<< "$MESSAGE"; then
-              COMMENT_BODY+="> [!WARNING]\n> **Commit missing issue number:**\n\`$MESSAGE\`\nExpected: Should include \`#$issue_nnumber\`\n"
+              COMMENT_BODY+="> [!WARNING]\n> **Commit missing issue number:**\n\`$MESSAGE\`\nExpected: Should include \`#$issue_number\`\n"
               MISSING_ISSUE_NUMBER=$((MISSING_ISSUE_NUMBER+1))
             fi
           done
           
           if [[ $INVALID_COMMITS -gt 0 || $MISSING_ISSUE_NUMBER -gt 0 ]]; then
             COMMENT_BODY=$(cat <<EOF
-            👋 **@${PR_AUTHOR}, there are issues with your commit messages in this PR:**
+          👋 **@${PR_AUTHOR}, there are issues with your commit messages in this PR:**
           
-            $COMMENT_BODY
-            EOF
+          $COMMENT_BODY
+          EOF
             )
 
             gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
