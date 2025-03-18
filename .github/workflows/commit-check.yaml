@@ -77,15 +77,17 @@ jobs:
     name: "Ensure Branch is Up-to-Date"
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout code"
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: "Fetch main branch"
         run: git fetch origin main
 
       - name: "Check if branch is up-to-date"
         run: |
-          BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
+          BEHIND_COUNT=$(git rev-list --count ${{ github.event.pull_request.head.sha }}..origin/main)
           if [ "$BEHIND_COUNT" -gt 0 ]; then
             gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
             > **Branch is behind main by $BEHIND_COUNT commits.**
