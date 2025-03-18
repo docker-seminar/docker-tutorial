@@ -12,6 +12,26 @@ correctness of user-submitted configurations without requiring manual interventi
 With an interactive code editor, instant feedback, and secure sandboxed execution, this tutorial provides a hand-on
 learning experience that bridges the gap between theory and practical application.
 
+# Architecture
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Svelte (Frontend)
+    participant NestJS (API Server)
+    participant Go (Docker Runner)
+    participant Docker Engine
+
+    User->>Svelte (Frontend): Writes a Dockerfile in editor
+    Svelte (Frontend)->>NestJS (API Server): Submits Dockerfile via API
+    NestJS (API Server)->>Go (Docker Runner): Sends Dockerfile for execution
+    Go (Docker Runner)->>Docker Engine: Builds and runs the Dockerfile
+    Docker Engine-->>Go (Docker Runner): Returns build and run output
+    Go (Docker Runner)-->>NestJS (API Server): Sends validation result
+    NestJS (API Server)-->>Svelte (Frontend): Returns result (success/fail)
+    Svelte (Frontend)-->>User: Displays output and feedback
+```
+
 # References
 
 - https://github.com/ory/dockertest
