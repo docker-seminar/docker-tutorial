@@ -40,7 +40,7 @@ jobs:
           PR_AUTHOR=${{ github.event.pull_request.user.login }}
 
           # Allowed commit title keywords
-          ALLOWED_KEYWORDS="^(feat|fix|refactor|chore|docs|test|style|perf|revert)\\(.+\\): .{10,}$"
+          ALLOWED_KEYWORDS="^(feat|fix|refactor|chore|docs|test|style|perf|revert|infra)\\(.+\\): .{10,}$"
           INVALID_COMMITS=0
           MISSING_ISSUE_NUMBER=0
           COMMENT_BODY=""
