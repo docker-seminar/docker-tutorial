@@ -1,0 +1,87 @@
+name: Commit & Branch Validation
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  validate-commit-messages:
+    name: Check Commit Messages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up GitHub CLI
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+      - name: Extract Branch Name
+        id: branch
+        run: echo "branch_name=${{ github.head_ref }}" >> $GITHUB_ENV
+      - name: Validate Branch Naming Convention
+        run: |
+          branch_name="${{ env.branch_name }}"
+          
+          if [[ !$branch_name =~ ^[a-z]+/[0-9]+$ ]]; then
+            echo "❌ Branch name must follow '[category]/[issue_number]'"
+            gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
+            > **Branch naming error**
+            The branch name \`$branch_name\` does not follow the required pattern \`[category]/[issue_number]\`.
+            Please rename your branch.
+            > [!IMPORTANT]
+            > Refer to `.github/CONTRIBUTING.md` for detailed branch naming convention."
+            exit 1
+          fi
+      - name: Check Commit Messages
+        run: |
+          branch_name="${{ env.branch_name }}"
+          issue_Number=$(echo "$branch_name" | cut -d '/' -f 2)
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PR_AUTHOR=${{ github.event.pull_request.user.login }}
+
+          # Allowed commit title keywords
+          ALLOWED_KEYWORDS="^(feat|fix|refactor|chore|docs|test|style|perf|revert)\\(.+\\): .{10,}$"
+          INVALID_COMMITS=0
+          MISSING_ISSUE_NUMBER=0
+          COMMENT_BODY=""
+          
+          for commit in $(git log --format="%H" origin/main..HEAD); do
+            MESSAGE=$(git log --format="%s%n%n%b" -n 1 $commit)
+            
+            # Check commit message format
+            if [[ ! $(echo "$MESSAGE" | head -n 1) =~ $ALLOWED_KEYWORDS ]]; then
+              COMMENT_BODY+="> [!WARNING]
+              > **Invalid commit message format:**\n\`$MESSAGE\`\n"
+            fi
+          
+            # Check if commit message references issue number
+            if ! grep -q "#$issue_number" <<< "$MESSAGE"; then
+              COMMENT_BODY+="> [!WARNING]
+              > **Commit missing issue number:**\n\`$MESSAGE\`\nExpected: Should include \`#$issue_nnumber]`]n"
+              MISSING_ISSUE_NUMBER=$((MISSING_ISSUE_NUMBER+1))
+            fi
+          done
+          
+          if [[ $INVALID_COMMITS -gt 0 || $MISSING_ISSUE_NUMBER -gt 0 ]]; then
+            COMMENT_BODY="👋 **@${PR_AUTHOR}, there are issues with your commit messages in this PR:**\n$COMMENT_BODY"
+            gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
+            exit 1
+          fi
+  check-branch-up-to-date:
+    name: "Ensure Branch is Up-to-Date"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Fetch main branch"
+        run: git fetch origin main
+
+      - name: "Check if branch is up-to-date"
+        run: |
+          BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
+          if [ "$BEHIND_COUNT" -gt 0 ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
+            > **Branch is behind main by $BEHIND_COUNT commits.**
+            Please rebase before merging."
+            exit 1
+          fi
