@@ -21,7 +21,7 @@ jobs:
         run: |
           branch_name="${{ env.branch_name }}"
           
-          if [[ !$branch_name =~ ^[a-z]+/[0-9]+$ ]]; then
+          if [[ ! $branch_name =~ ^[a-z]+/[0-9]+$ ]]; then
             echo "❌ Branch name must follow '[category]/[issue_number]'"
             gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
             > **Branch naming error**
