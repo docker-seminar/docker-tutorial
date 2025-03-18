@@ -1,0 +1,46 @@
+allowed_keywords:
+  - name: feat
+    description: Introduce a new feature.
+    requires_scope: true
+    scopes: [ Config ]
+    example: "feat(Config): Add dynamic environment variable loading"
+  - name: fix
+    description: Fix a bug.
+    requires_scope: true
+    scopes: [ Database ]
+    example: "fix(Database): Resolve connection timeout issue"
+  - name: refactor
+    description: Improve existing code without changing functionality.
+    requires_scope: true
+    scopes: [ Performance ]
+    example: "refactor(Performance): Remove unnecessary validation logic"
+  - name: chore
+    description: General maintenance tasks (e.g.,dependencies, configs)
+    requires_scope: true
+    scopes: [ Dependencies, Configs ]
+    example: "chore(Dependencies): Bump TypeScript version"
+  - name: infra
+    description: Infrastructure-related changes (e.g., CI/CD, Cloud)
+    requires_scope: true
+    scopes: [ CI, CD, CloudFormation ]
+    example: "infra(CI): Validate PR title before merging"
+  - name: docs
+    description: Documentation updates
+    requires_scope: true
+    scopes: [ README, CONTRIBUTING, API ]
+    example: "docs(README): Clarify installation steps"
+  - name: test
+    description: Add or update tests
+    requires_scope: true
+    scopes: [ Unit, Integration, E2E ]
+    example: "test(Unit): Add tests for validation service"
+  - name: style
+    description: Code style changes (e.g., formatting, linting)
+    requires_scope: false
+    scopes: [ ]
+    example: "style: Apply Prettier auto-formatting"
+  - name: revert
+    description: "Revert a previous commit"
+    requires_scope: false
+    scopes: [ ]
+    example: "revert: 'fix(Database): Resolve connection timeout issue'"
