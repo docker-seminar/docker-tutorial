@@ -69,7 +69,7 @@ jobs:
           
               # If scope is required but missing, fail
               if [[ "$REQUIRES_SCOPE" == "true" && -z "$COMMIT_SCOPE" ]]; then
-                COMMENT_BODY+=$(printf -- "- **Missing required scope in commit %s:**\n\`%s\`\n\n" "$commit" $MESSAGE")
+                COMMENT_BODY+=$(printf -- "- **Missing required scope in commit %s:**\n\`%s\`\n\n" "$commit" "$MESSAGE")
                 INVALID_SCOPES=$((INVALID_SCOPES+1))
               fi
           
