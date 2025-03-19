@@ -57,7 +57,7 @@ if ! command_exists yq; then
   elif command_exists apt; then
     sudo apt update && sudo apt install -y yq
   elif command_exists yum; then
-    sudo yum instlal -y yq
+    sudo yum install -y yq
   elif command_exists apk; then
     apk add --no-cache yq
   else
