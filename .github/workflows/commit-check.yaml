@@ -51,6 +51,7 @@ jobs:
 
           INVALID_COMMITS=0
           MISSING_ISSUE_NUMBER=0
+          INVALID_SCOPES=0
           COMMENT_BODY=""
           
           for commit in $(git rev-list --no-merges origin/main..HEAD); do          
