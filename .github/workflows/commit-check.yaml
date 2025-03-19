@@ -59,7 +59,7 @@ jobs:
             
             # Check commit message format
             if [[ ! "$MESSAGE" =~ $COMMIT_PATTERN ]]; then
-              COMMENT_BODY+=$(printf -- "- **Invalid commit message format (Commit ID: %s):**\n\`%s\`\n\n" "$commit" "$MESSAGE")
+              COMMENT_BODY+=$(printf -- "- **Invalid commit message format (Commit ID: %s):**\n\`\`\`\n%s\n\`\`\`\n\n" "$commit" "$MESSAGE")
               INVALID_COMMITS=$((INVALID_COMMITS+1))
             else
               COMMIT_KEYWORD="${BASH_REMATCH[1]}"
