@@ -21,14 +21,17 @@ jobs:
         id: validate
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           ALLOWED_KEYWORDS_JSON: ${{ steps.read-keywords.outputs.stdout }}
         run: |
           echo "Validating PR title: $PR_TITLE"
           
           # Extract keyword, scope, and description from the PR title
-          PR_PATTERN="^([a-z]+)(?:\(([A-Za-z0-9/-]+)\))?: (.+)$"
+          PR_PATTERN='^([a-z]+)(\([A-Za-z0-9]+\))?: (.+)$'
           if [[ ! "$PR_TITLE" =~ $PR_PATTERN ]]; then
-            echo "::error::Invalid PR title format. Expected <type>(<scope>): <description>"
+            COMMENT_BODY="> [!Warning]\n> Invalid PR title format. Expected: <type>(<scope>): <description>"
+            gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
+            echo "::error::Invalid PR title format. Expected: <type>(<scope>): <description>"
             exit 1
           fi
           PR_KEYWORD="${BASH_REMATCH[1]}"
