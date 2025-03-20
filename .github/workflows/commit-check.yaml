@@ -47,7 +47,7 @@ jobs:
           # Parse allowed commit keywords from validation.yaml
           ALLOWED_KEYWORDS_JSON='${{ steps.read-keywords.outputs.stdout }}'
           ALLOWED_KEYWORDS=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r '.[].name' | paste -sd "|")
-          COMMIT_PATTERN="^($ALLOWED_KEYWORDS)(?:\(([A-Za-z0-9/-]+)\))?: .{10,}$"
+          COMMIT_PATTERN='^([a-z]+)(\([A-Za-z0-9]+\))?: (.+)$'
 
           INVALID_COMMITS=0
           MISSING_ISSUE_NUMBER=0
@@ -56,15 +56,13 @@ jobs:
           
           for commit in $(git rev-list --no-merges origin/main..HEAD); do
           
-            MESSAGE=$(git log --format="%s%n%n%b" -n 1 $commit)
-            echo "Message: $MESSAGE"
-            # Extract the first line (title)
-            commit_title=$(echo "$MESSAGE" | head -n 1)
-            echo "Commit title: $commit_title"
-            
-            # Check commit message format
-            if [[ ! "$MESSAGE" =~ $COMMIT_PATTERN ]]; then
-              COMMENT_BODY+=$(printf -- "- **Invalid commit message format (Commit ID: %s):**\n\`\`\`\n%s\n\`\`\`\n\n" "$commit" "$MESSAGE")
+            commit_title=$(git log --format="%s%n%n%b" -n 1 $commit)
+            echo "Validating commit title: $commit_title"
+          
+            # Check if the commit title matches the full pattern
+            if [[ ! "$commit_title" =~ $COMMIT_PATTERN ]]; then
+              echo ""❌ Invalid commit message format! Expected: <type>(<scope>): <description>""
+              COMMENT_BODY+=$(printf -- "- **Invalid commit message format (Commit ID: %s):**\n\`\`\`\n%s\n\`\`\`\n\n" "$commit" "$commit_title")
               INVALID_COMMITS=$((INVALID_COMMITS+1))
             else
               COMMIT_KEYWORD="${BASH_REMATCH[1]}"
@@ -75,7 +73,7 @@ jobs:
           
               # If scope is required but missing, fail
               if [[ "$REQUIRES_SCOPE" == "true" && -z "$COMMIT_SCOPE" ]]; then
-                COMMENT_BODY+=$(printf -- "- **Missing required scope in commit %s:**\n\`%s\`\n\n" "$commit" "$MESSAGE")
+                COMMENT_BODY+=$(printf -- "- **Missing required scope in commit %s:**\n\`%s\`\n\n" "$commit" "$commit_title")
                 INVALID_SCOPES=$((INVALID_SCOPES+1))
               fi
           
@@ -83,7 +81,7 @@ jobs:
               if [[ -n "$COMMIT_SCOPE" ]]; then
                 VALID_SCOPES=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg  key "$COMMIT_KEYWORD" '.[] | select(.name == $key) | .scopes[]')
                 if ! echo "$VALID_SCOPES" | grep -qw "$COMMIT_SCOPE"; then
-                  COMMENT_BODY+=$(printf -- "- **Invalid scope in commit %s:**\n\`%s\`\nAllowed scopes for \`%s\`: %s\n\n" "$commit" "$MESSAGE" "$COMMIT_KEYWORD" "$VALID_SCOPES")
+                  COMMENT_BODY+=$(printf -- "- **Invalid scope in commit %s:**\n\`%s\`\nAllowed scopes for \`%s\`: %s\n\n" "$commit" "$commit_title" "$COMMIT_KEYWORD" "$VALID_SCOPES")
                   INVALID_SCOPES=$((INVALID_SCOPES+1))
                 fi
               fi
@@ -92,8 +90,8 @@ jobs:
             COMMENT_BODY="$COMMENT_BODY"$'\n'
 
             # Check if commit message references issue number
-            if ! grep -q "#$issue_number" <<< "$MESSAGE"; then
-              COMMENT_BODY+=$(printf -- "- **Commit missing issue number reference (Commit ID: %s):**\n\`%s\`\n\n" "$commit" "$MESSAGE")
+            if ! grep -q "#$issue_number" <<< "$commit_title"; then
+              COMMENT_BODY+=$(printf -- "- **Commit missing issue number reference (Commit ID: %s):**\n\`%s\`\n\n" "$commit" "$commit_title")
               MISSING_ISSUE_NUMBER=$((MISSING_ISSUE_NUMBER+1))
             fi
           done
