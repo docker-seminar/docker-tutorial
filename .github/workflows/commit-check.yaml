@@ -54,7 +54,12 @@ jobs:
           INVALID_SCOPES=0
           COMMENT_BODY=""
           
-          for commit in $(git rev-list --no-merges origin/main..HEAD); do          
+          for commit in $(git rev-list --no-merges origin/main..HEAD); do
+          
+            # Extract the first line (title)
+            commit_title=$(echo "$commit" | head -n 1)
+            echo "Commit title: $commit_title"
+          
             MESSAGE=$(git log --format="%s%n%n%b" -n 1 $commit)
             
             # Check commit message format
