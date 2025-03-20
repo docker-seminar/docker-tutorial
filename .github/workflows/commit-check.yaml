@@ -15,6 +15,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Read allowed keywords from YAML
+        id: read-keywords
+        uses: mikefarah/yq@v4
+        with:
+          cmd: yq '.allowed_keywords' infra/config/validation.yaml -o=json
       - name: Extract Branch Name
         id: branch
         run: echo "branch_name=${{ github.head_ref }}" >> $GITHUB_ENV
@@ -39,26 +44,54 @@ jobs:
           PR_NUMBER=${{ github.event.pull_request.number }}
           PR_AUTHOR=${{ github.event.pull_request.user.login }}
 
-          # Allowed commit title keywords
-          ALLOWED_KEYWORDS="^(feat|fix|refactor|chore|docs|test|style|perf|revert|infra)\\(.+\\): .{10,}$"
+          # Parse allowed commit keywords from validation.yaml
+          ALLOWED_KEYWORDS_JSON='${{ steps.read-keywords.outputs.stdout }}'
+          ALLOWED_KEYWORDS=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r '.[].name' | paste -sd "|")
+          COMMIT_PATTERN='^([a-z]+)(\([A-Za-z0-9]+\))?: (.+)$'
+
           INVALID_COMMITS=0
           MISSING_ISSUE_NUMBER=0
+          INVALID_SCOPES=0
           COMMENT_BODY=""
           
-          for commit in $(git rev-list --no-merges origin/main..HEAD); do          
-            MESSAGE=$(git log --format="%s%n%n%b" -n 1 $commit)
-            
-            # Check commit message format
-            if [[ ! $(echo "$MESSAGE" | head -n 1) =~ $ALLOWED_KEYWORDS ]]; then
-              COMMENT_BODY+=$(printf -- "- **Invalid commit message format (Commit ID: %s):**\n\`%s\`\n\n" "$commit" "$MESSAGE")
+          for commit in $(git rev-list --no-merges origin/main..HEAD); do
+          
+            commit_title=$(git log --format="%s%n%n%b" -n 1 $commit)
+            echo "Validating commit title: $commit_title"
+          
+            # Check if the commit title matches the full pattern
+            if [[ ! "$commit_title" =~ $COMMIT_PATTERN ]]; then
+              echo "❌ Invalid commit message format! Expected: <type>(<scope>): <description>"
+              COMMENT_BODY+=$(printf -- "- **Invalid commit message format (Commit ID: %s):**\n\`\`\`\n%s\n\`\`\`\n\n" "$commit" "$commit_title")
               INVALID_COMMITS=$((INVALID_COMMITS+1))
+            else
+              COMMIT_KEYWORD="${BASH_REMATCH[1]}"
+              COMMIT_SCOPE="${BASH_REMATCH[2]}"
+          
+              # Get 'requires_scope' value from YAML
+              REQUIRES_SCOPE=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg key "$COMMIT_KEYWORD" '.[] | select(.name == $key) | .requires_scope')
+          
+              # If scope is required but missing, fail
+              if [[ "$REQUIRES_SCOPE" == "true" && -z "$COMMIT_SCOPE" ]]; then
+                COMMENT_BODY+=$(printf -- "- **Missing required scope in commit %s:**\n\`%s\`\n\n" "$commit" "$commit_title")
+                INVALID_SCOPES=$((INVALID_SCOPES+1))
+              fi
+          
+              # If a scope is provided, validate it
+              if [[ -n "$COMMIT_SCOPE" ]]; then
+                VALID_SCOPES=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg  key "$COMMIT_KEYWORD" '.[] | select(.name == $key) | .scopes[]')
+                if ! echo "$VALID_SCOPES" | grep -qw "$COMMIT_SCOPE"; then
+                  COMMENT_BODY+=$(printf -- "- **Invalid scope in commit %s:**\n\`%s\`\nAllowed scopes for \`%s\`: %s\n\n" "$commit" "$commit_title" "$COMMIT_KEYWORD" "$VALID_SCOPES")
+                  INVALID_SCOPES=$((INVALID_SCOPES+1))
+                fi
+              fi
             fi
           
             COMMENT_BODY="$COMMENT_BODY"$'\n'
 
             # Check if commit message references issue number
-            if ! grep -q "#$issue_number" <<< "$MESSAGE"; then
-              COMMENT_BODY+=$(printf -- "- **Commit missing issue number reference (Commit ID: %s):**\n\`%s\`\n\n" "$commit" "$MESSAGE")
+            if ! grep -q "#$issue_number" <<< "$commit_title"; then
+              COMMENT_BODY+=$(printf -- "- **Commit missing issue number reference (Commit ID: %s):**\n\`%s\`\n\n" "$commit" "$commit_title")
               MISSING_ISSUE_NUMBER=$((MISSING_ISSUE_NUMBER+1))
             fi
           done
