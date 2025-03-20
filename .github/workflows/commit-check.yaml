@@ -56,11 +56,11 @@ jobs:
           
           for commit in $(git rev-list --no-merges origin/main..HEAD); do
           
-            # Extract the first line (title)
-            commit_title=$(echo "$commit" | head -n 1)
-            echo "Commit title: $commit_title"
-          
             MESSAGE=$(git log --format="%s%n%n%b" -n 1 $commit)
+            echo "Message: $MESSAGE"
+            # Extract the first line (title)
+            commit_title=$(echo "$MESSAGE" | head -n 1)
+            echo "Commit title: $commit_title"
             
             # Check commit message format
             if [[ ! "$MESSAGE" =~ $COMMIT_PATTERN ]]; then
