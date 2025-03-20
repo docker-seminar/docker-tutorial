@@ -2,7 +2,7 @@ allowed_keywords:
   - name: feat
     description: Introduce a new feature.
     requires_scope: true
-    scopes: [ Config ]
+    scopes: [ Server, Config ]
     example: "feat(Config): Add dynamic environment variable loading"
   - name: fix
     description: Fix a bug.
