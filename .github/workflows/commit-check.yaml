@@ -61,7 +61,7 @@ jobs:
           
             # Check if the commit title matches the full pattern
             if [[ ! "$commit_title" =~ $COMMIT_PATTERN ]]; then
-              echo ""❌ Invalid commit message format! Expected: <type>(<scope>): <description>""
+              echo "❌ Invalid commit message format! Expected: <type>(<scope>): <description>"
               COMMENT_BODY+=$(printf -- "- **Invalid commit message format (Commit ID: %s):**\n\`\`\`\n%s\n\`\`\`\n\n" "$commit" "$commit_title")
               INVALID_COMMITS=$((INVALID_COMMITS+1))
             else
