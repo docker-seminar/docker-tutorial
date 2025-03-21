@@ -49,3 +49,8 @@ allowed_keywords:
     requires_scope: false
     scopes: [ ]
     example: "revert: 'fix(Database): Resolve connection timeout issue'"
+  - name: remove
+    description: Remove deprecated or unnecessary code, files, or features.
+    requires_scope: true
+    scopes: [ Code, Files, Feature ]
+    example: "remove(Code): Delete obsolete authentication module"
