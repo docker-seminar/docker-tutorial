@@ -43,9 +43,12 @@ jobs:
           echo "Description: $PR_DESCRIPTION"
           
           # Parse JSON from validation.yaml
+          # Configuration file location
+          validation_yaml="infra/config/validation.yaml"
+          
           # Confirm the keyword exists.
           keyword_exists="$(
-            yq e ".allowed_keywords[] | select(.name == \"$COMMIT_KEYWORD\") | .name" \
+            yq e ".allowed_keywords[] | select(.name == \"$PR_KEYWORD\") | .name" \
             "$validation_yaml"
           )"
           echo "Is keyword $Keyword exists in allowed_keywords?: $keyword_exists"
