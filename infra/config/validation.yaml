@@ -23,6 +23,7 @@ allowed_keywords:
       - gitignore
       # When Changing scripts in package.json
       - Script
+      - Lint
     example: "chore(Dependencies): Bump TypeScript version"
   - name: infra
     description: Infrastructure-related changes (e.g., CI/CD, Cloud)
