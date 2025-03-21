@@ -17,7 +17,12 @@ allowed_keywords:
   - name: chore
     description: General maintenance tasks (e.g., dependencies, configs)
     requires_scope: true
-    scopes: [ Dependencies, Configs ]
+    scopes:
+      - Dependencies
+      - Configs
+      - gitignore
+      # When Changing scripts in package.json
+      - Script
     example: "chore(Dependencies): Bump TypeScript version"
   - name: infra
     description: Infrastructure-related changes (e.g., CI/CD, Cloud)
@@ -44,3 +49,8 @@ allowed_keywords:
     requires_scope: false
     scopes: [ ]
     example: "revert: 'fix(Database): Resolve connection timeout issue'"
+  - name: remove
+    description: Remove deprecated or unnecessary code, files, or features.
+    requires_scope: true
+    scopes: [ Code, Files, Feature ]
+    example: "remove(Code): Delete obsolete authentication module"
