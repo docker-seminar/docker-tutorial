@@ -52,7 +52,6 @@ jobs:
             yq e ".allowed_keywords[] | select(.name == \"$PR_KEYWORD\") | .name" \
             "$validation_yaml"
           )"
-          echo "Is keyword $Keyword exists in allowed_keywords?: $keyword_exists"
           
           if [[ -z "$keyword_exists" ]]; then
           
