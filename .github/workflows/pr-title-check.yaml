@@ -24,7 +24,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           ALLOWED_KEYWORDS_JSON: ${{ steps.read-keywords.outputs.stdout }}
         run: |
-          echo "Validating PR title: $PR_TITLE"
+          echo "Validating PR title: '$PR_TITLE'"
           
           # Extract keyword, scope, and description from the PR title
           PR_PATTERN='^([a-z]+)(\([A-Za-z0-9]+\))?: (.+)$'
@@ -34,6 +34,7 @@ jobs:
             echo "::error::Invalid PR title format. Expected: <type>(<scope>): <description>"
             exit 1
           fi
+
           PR_KEYWORD="${BASH_REMATCH[1]}"
           PR_SCOPE="${BASH_REMATCH[2]}"
           PR_DESCRIPTION="${BASH_REMATCH[3]}"
@@ -53,9 +54,16 @@ jobs:
           )"
           echo "Is keyword $Keyword exists in allowed_keywords?: $keyword_exists"
           
-          ALLOWED_KEYWORDS=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r '.[].name')
-          if ! echo "$ALLOWED_KEYWORDS" | grep -qw "$PR_KEYWORD"; then
-            echo "::error::Invalid PR keyword: '$PR_KEYWORD'. Allowed: $ALLOWED_KEYWORDS"
+          if [[ -z "$keyword_exists" ]]; then
+          
+            # Print out the list of all allowed keywords as comma-separated on one line
+            allowed_keywords="$(
+              yq e '.allowed_keywords[].name' "$validation_yaml" \
+              | parse -sd ',' -
+            )"
+          
+            echo "ℹ️ Allowed keywords are: $allowed_keywords"
+
             exit 1
           fi
           
