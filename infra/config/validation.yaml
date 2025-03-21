@@ -17,7 +17,12 @@ allowed_keywords:
   - name: chore
     description: General maintenance tasks (e.g., dependencies, configs)
     requires_scope: true
-    scopes: [ Dependencies, Configs, gitignore ]
+    scopes:
+      - Dependencies
+      - Configs
+      - gitignore
+      # When Changing scripts in package.json
+      - Script
     example: "chore(Dependencies): Bump TypeScript version"
   - name: infra
     description: Infrastructure-related changes (e.g., CI/CD, Cloud)
