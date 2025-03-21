@@ -3,6 +3,9 @@ name: Continuous Integration
 on:
   push:
 
+env:
+  cache-name: cache-node-modules
+
 jobs:
   setup:
     name: Setup & Cache Dependencies
@@ -21,8 +24,6 @@ jobs:
       - name: Cache node modules
         id: cache-npm
         uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
         with:
           path: server/node_modules
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('server/package-lock.json') }}
