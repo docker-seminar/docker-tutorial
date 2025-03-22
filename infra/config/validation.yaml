@@ -12,7 +12,15 @@ allowed_keywords:
   - name: refactor
     description: Improve existing code without changing functionality.
     requires_scope: true
-    scopes: [ Performance ]
+    scopes:
+        # For changes that optimize speed or resource usage.
+      - Performance
+        # For changes that improve the structure or separation of concerns.
+      - Modularity
+        # When refactoring to make the code easier to understand.
+      - Readability
+        # For improvements that simplify future updates or maintenance.
+      - Maintainability
     example: "refactor(Performance): Remove unnecessary validation logic"
   - name: chore
     description: General maintenance tasks (e.g., dependencies, configs)
@@ -23,6 +31,7 @@ allowed_keywords:
       - gitignore
       # When Changing scripts in package.json
       - Script
+      - Lint
     example: "chore(Dependencies): Bump TypeScript version"
   - name: infra
     description: Infrastructure-related changes (e.g., CI/CD, Cloud)
