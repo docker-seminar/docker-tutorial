@@ -70,103 +70,14 @@ echo "yq is installed."
 
 # Extract the first line (title)
 commit_title=$(echo "$commit_msg" | head -n 1)
-
-# Extract keyword, scope, and description from the commit title
-COMMIT_PATTERN='^([a-z]+)(\([A-Za-z0-9]+\))?: (.+)$'
-
 echo "Validating commit title: $commit_title"
 
-# Check if commit title matches the full pattern
-if [[ ! "$commit_title" =~ $COMMIT_PATTERN ]]; then
-  echo "❌ Invalid commit message format! Expected: <type>(<scope>): <description>"
-
-  # Debugging: Check where it failed
-  if ! [[ "$commit_title" =~ ^[a-z]+ ]]; then
-    echo "🔍 Error: The keyword is missing or not lowercase."
-  fi
-
-  if ! [[ "$commit_title" =~ \(([A-Za-z0-9/-]+)\) ]]; then
-    echo "🔍 Error: Scope is missing or has invalid characters."
-  fi
-
-  if ! [[ "$commit_title" =~ :\  ]]; then
-    echo "🔍 Error: The colon separator is missing or incorrect."
-  fi
-
-  if ! [[ "$commit_title" =~ :\ (.+)$ ]]; then
-    echo "🔍 Error: Description is missing after ':'."
-  fi
-
+# Check if the child script reported an error.
+if ! source infra/scripts/conventional-titles/parse-title.sh "$commit_title"; then
+  echo "Commit title validation failed:" >&2
+  echo "$MESSAGES" >&2
   exit 1
+
+else
+  echo "$MESSAGES"
 fi
-
-# Debugging: Show extracted values
-COMMIT_KEYWORD="${BASH_REMATCH[1]}"
-COMMIT_SCOPE_RAW="${BASH_REMATCH[2]}"  # e.g. "(Git)"
-COMMIT_DESCRIPTION="${BASH_REMATCH[3]}"
-
-# Use parameter expansion to remove '(' and ')'
-COMMIT_SCOPE="${COMMIT_SCOPE_RAW#(}"   # e.g. "Git)"
-COMMIT_SCOPE="${COMMIT_SCOPE%)}"       # e.g. "Git"
-
-echo "Keyword: $COMMIT_KEYWORD"
-echo "Scope: $COMMIT_SCOPE"
-echo "Description: $COMMIT_DESCRIPTION"
-
-# Confirm the keyword exists.
-keyword_exists="$(
-  yq e ".allowed_keywords[] | select(.name == \"$COMMIT_KEYWORD\") | .name" \
-  "$validation_yaml"
-)"
-
-if [[ -z "$keyword_exists" ]]; then
-  echo "❌ Invalid keyword: $COMMIT_KEYWORD"
-
-  # Print out the list of all allowed keywords as comma-separated on one line
-  allowed_keywords="$(
-    yq e '.allowed_keywords[].name' "$validation_yaml" \
-    | paste -sd ',' -
-  )"
-
-  echo "✅ Allowed keywords are: $allowed_keywords"
-
-  exit 1
-fi
-
-# Check requires_scope
-keyword_requires_scope="$(
-  yq e ".allowed_keywords[] | select(.name == \"$COMMIT_KEYWORD\") | .requires_scope" \
-    "$validation_yaml"
-)"
-
-if [[ "$keyword_requires_scope" == "true" ]]; then
-  if [[ -z "$COMMIT_SCOPE" ]]; then
-    echo "❌ The keyword '$COMMIT_KEYWORD' requires a scope, but none was provided."
-    exit 1
-  fi
-
-  # Check allowed scopes
-  allowed_scopes="$(
-    yq e ".allowed_keywords[] | select(.name == \"$COMMIT_KEYWORD\") | .scopes[]" "$validation_yaml"
-  )"
-
-  allowed_scopes_csv="$(
-    echo "$allowed_scopes" \
-    | paste -sd ',' -
-  )"
-
-  if ! echo "$allowed_scopes" | grep -qx "$COMMIT_SCOPE"; then
-    echo "❌ Scope '$COMMIT_SCOPE' is not in the allowed scopes for '$COMMIT_KEYWORD'."
-    echo "✅ Allowed scopes are:"
-    echo "$allowed_scopes_csv"
-    exit 1
-  fi
-
-else # requires_scope == "false"
-  if [[ -n "$COMMIT_SCOPE" ]]; then
-    echo "❌ The keyword '$COMMIT_KEYWORD' does not allow a scope, but one was provided ($COMMIT_SCOPE)."
-    exit 1
-  fi
-fi
-
-echo "✅ Valid commit message!"
