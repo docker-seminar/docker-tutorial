@@ -26,73 +26,14 @@ jobs:
         run: |
           echo "Validating PR title: '$PR_TITLE'"
           
-          # Extract keyword, scope, and description from the PR title
-          PR_PATTERN='^([a-z]+)(\([A-Za-z0-9]+\))?: (.+)$'
-          if [[ ! "$PR_TITLE" =~ $PR_PATTERN ]]; then
-            COMMENT_BODY="> [!Warning]\n> Invalid PR title format. Expected: <type>(<scope>): <description>"
-            gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
-            echo "::error::Invalid PR title format. Expected: <type>(<scope>): <description>"
+          # Check if the child script reported an error
+          if ! source infra/scripts/conventional-titles/parse-title.sh "$PR_TITLE"; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
+            > PR title validation failed!
+            $MESSAGES"
             exit 1
+          else
+            gh pr comment ${{ github.event.pull_request.number }} --body "> [!NOTE]
+            > PR title validation succeeded.
+            $MESSAGES"
           fi
-
-          PR_KEYWORD="${BASH_REMATCH[1]}"
-          PR_SCOPE="${BASH_REMATCH[2]}"
-          PR_DESCRIPTION="${BASH_REMATCH[3]}"
-          
-          echo "Keyword: $PR_KEYWORD"
-          echo "Scope: $PR_SCOPE"
-          echo "Description: $PR_DESCRIPTION"
-          
-          # Parse JSON from validation.yaml
-          # Configuration file location
-          validation_yaml="infra/config/validation.yaml"
-          
-          # Confirm the keyword exists.
-          keyword_exists="$(
-            yq e ".allowed_keywords[] | select(.name == \"$PR_KEYWORD\") | .name" \
-            "$validation_yaml"
-          )"
-          
-          if [[ -z "$keyword_exists" ]]; then
-          
-            # Print out the list of all allowed keywords as comma-separated on one line
-            allowed_keywords="$(
-              yq e '.allowed_keywords[].name' "$validation_yaml" \
-              | parse -sd ',' -
-            )"
-          
-            echo "ℹ️ Allowed keywords are: $allowed_keywords"
-
-            exit 1
-          fi
-          
-          # Check if the keyword required a scope
-          REQUIRES_SCOPE=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg key "$PR_KEYWORD" '.[] | select(.name == $key) | .requires_scope')
-
-          if [[ "$REQUIRES_SCOPE" == "true" && -z "$PR_SCOPE" ]]; then
-            echo "::error::PR title must include a scope for '$PR_KEYWORD'."
-            exit 1
-          fi
-          
-          # Validate scope if provided
-          if [[ -n "$PR_SCOPE" ]]; then
-            VALID_SCOPES=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg key "$PR_KEYWORD" '.[] | select(.name == $key) | .scopes[]')
-            if ! echo "$VALID_SCOPES" | grep -qw "$PR_SCOPE"; then
-              echo "::error::Invalid scope '$PR_SCOPE' for '$PR_KEYWORD'. Allowed scopes: $VALID_SCOPES"
-              echo "INVALID_SCOPE=1" >> $GITHUB_ENV
-              echo "VALID_SCOPES='$VALID_SCOPES'" >> $GITHUB_ENV
-              exit 1  # Still fail the workflow
-            fi
-          fi
-          
-          echo "::notice::PR title is valid!"
-      - name: Comment on PR if scope is invalid
-        if: env.INVALID_SCOPE == '1'
-        run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
-          > **PR Scope Warning**
-          The scope \`$PR_SCOPE\` is not an allowed scope for \`$PR_KEYWORD\`.
-          **Allowed scopes:** $VALID_SCOPES
-          
-          > [!TIP]
-          > If this scope should be valid, update \`infra/config/validation.yaml\`."
