@@ -54,7 +54,7 @@ validate_syntax() {
       log_message "🔍Keyword is missing or now lowercase"
     fi
 
-    if ! [[ "$title" =~ \(([A-Za-z0-9/-]+)]]\) ]]; then
+    if ! [[ "$title" =~ \(([A-Za-z0-9/-]+)\) ]]; then
       log_message "🔍Scope, if provided, must be enclosed in a parentheses and contain valid characters. (Optional)"
     fi
 
