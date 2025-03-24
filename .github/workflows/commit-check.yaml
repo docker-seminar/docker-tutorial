@@ -6,6 +6,7 @@ permissions:
   pull-requests: write
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PR_NUMBER: ${{ github.event.pull_request.number }}
 jobs:
   validate-commit-messages:
     name: Check Commit Messages
@@ -15,102 +16,71 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Read allowed keywords from YAML
-        id: read-keywords
-        uses: mikefarah/yq@v4
-        with:
-          cmd: yq '.allowed_keywords' infra/config/validation.yaml -o=json
-      - name: Extract Branch Name
-        id: branch
-        run: echo "branch_name=${{ github.head_ref }}" >> $GITHUB_ENV
-      - name: Validate Branch Naming Convention
+      - name: Validate branch name
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          branch_name="${{ env.branch_name }}"
+          echo "Validating branch name '$BRANCH_NAME'..."
+          pattern='^[a-z]+/[0-9]+$'
           
-          if [[ ! $branch_name =~ ^[a-z]+/[0-9]+$ ]]; then
-            echo "❌ Branch name must follow '[category]/[issue_number]'"
-            gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
-            > **Branch naming error**
-            The branch name \`$branch_name\` does not follow the required pattern \`[category]/[issue_number]\`.
+          if [[ ! $BRANCH_NAME =~ $pattern ]]; then
+            gh pr comment "$PR_NUMBER" --body "> [!WARNING]
+            > Invalid branch name!
+          
+            The branch name '$BRANCH_NAME' does not follow the required pattern: '<category>/<issue_number>' format.
             Please rename your branch.
+          
             > [!IMPORTANT]
             > Refer to `.github/CONTRIBUTING.md` for detailed branch naming convention."
+          
             exit 1
           fi
-      - name: Check Commit Messages
+          
+          issue_number=$(echo "$BRANCH_NAME" | cut -d '/' -f 2)
+          echo "ISSUE_NUMBER=$issue_number" >> $GITHUB_ENV
+      - name: Validate commit message
+        id: validate-commit-message
         run: |
-          branch_name="${{ env.branch_name }}"
-          issue_number=$(echo "$branch_name" | cut -d '/' -f 2)
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          PR_AUTHOR=${{ github.event.pull_request.user.login }}
-
-          # Parse allowed commit keywords from validation.yaml
-          ALLOWED_KEYWORDS_JSON='${{ steps.read-keywords.outputs.stdout }}'
-          ALLOWED_KEYWORDS=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r '.[].name' | paste -sd "|")
-          COMMIT_PATTERN='^([a-z]+)(\([A-Za-z0-9]+\))?: (.+)$'
-
-          INVALID_COMMITS=0
-          MISSING_ISSUE_NUMBER=0
-          INVALID_SCOPES=0
-          COMMENT_BODY=""
+          echo "Validating commit messages..."
+          comment_body=""
+          invalid_commit_messages_count=0
+          missing_issue_number_count=0
           
           for commit in $(git rev-list --no-merges origin/main..HEAD); do
+            echo "Validating commit: '$commit'"
           
-            commit_title=$(git log --format="%s%n%n%b" -n 1 $commit)
-            echo "Validating commit title: $commit_title"
+            commit_message=$(git log -n 1 --format=%B "$commit")
+            commit_title=$(echo "$commit_message" | head -n 1)
+            issue_reference=$(echo "$commit_message" | tail -n 1)
           
-            # Check if the commit title matches the full pattern
-            if [[ ! "$commit_title" =~ $COMMIT_PATTERN ]]; then
-              echo "❌ Invalid commit message format! Expected: <type>(<scope>): <description>"
-              COMMENT_BODY+=$(printf -- "- **Invalid commit message format (Commit ID: %s):**\n\`\`\`\n%s\n\`\`\`\n\n" "$commit" "$commit_title")
-              INVALID_COMMITS=$((INVALID_COMMITS+1))
-            else
-              COMMIT_KEYWORD="${BASH_REMATCH[1]}"
-              COMMIT_SCOPE="${BASH_REMATCH[2]}"
+            echo "Validating commit title: '$commit_title'"
           
-              # Get 'requires_scope' value from YAML
-              REQUIRES_SCOPE=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg key "$COMMIT_KEYWORD" '.[] | select(.name == $key) | .requires_scope')
-          
-              # If scope is required but missing, fail
-              if [[ "$REQUIRES_SCOPE" == "true" && -z "$COMMIT_SCOPE" ]]; then
-                COMMENT_BODY+=$(printf -- "- **Missing required scope in commit %s:**\n\`%s\`\n\n" "$commit" "$commit_title")
-                INVALID_SCOPES=$((INVALID_SCOPES+1))
-              fi
-          
-              # If a scope is provided, validate it
-              if [[ -n "$COMMIT_SCOPE" ]]; then
-                VALID_SCOPES=$(echo "$ALLOWED_KEYWORDS_JSON" | jq -r --arg  key "$COMMIT_KEYWORD" '.[] | select(.name == $key) | .scopes[]')
-                if ! echo "$VALID_SCOPES" | grep -qw "$COMMIT_SCOPE"; then
-                  COMMENT_BODY+=$(printf -- "- **Invalid scope in commit %s:**\n\`%s\`\nAllowed scopes for \`%s\`: %s\n\n" "$commit" "$commit_title" "$COMMIT_KEYWORD" "$VALID_SCOPES")
-                  INVALID_SCOPES=$((INVALID_SCOPES+1))
-                fi
-              fi
+            # Check if the child script reported an error
+            if ! source infra/scripts/conventional-titles/parse-title.sh "$commit_title"; then
+              ((invalid_commit_messages_count++))
+              comment_body="${comment_body}"$'\n\n---\n'"$MESSAGES"
             fi
           
-            COMMENT_BODY="$COMMENT_BODY"$'\n'
-
-            # Check if commit message references issue number
-            if ! grep -q "#$issue_number" <<< "$commit_title"; then
-              COMMENT_BODY+=$(printf -- "- **Commit missing issue number reference (Commit ID: %s):**\n\`%s\`\n\n" "$commit" "$commit_title")
-              MISSING_ISSUE_NUMBER=$((MISSING_ISSUE_NUMBER+1))
+            # Chuck if commit message references a issue number
+            if ! grep -q "#$ISSUE_NUMBER" <<< "$issue_reference"; then
+              ((missing_issue_number_count++))
+              message="Missing issue reference in commit $commit."
+              comment_body="${comment_body}"$'\n\n---\n'"$message"
             fi
           done
           
-          if [[ $INVALID_COMMITS -gt 0 || $MISSING_ISSUE_NUMBER -gt 0 ]]; then
-            COMMENT_BODY=$(cat <<EOF
-          > [!WARNING]
-          > 👋 **@${PR_AUTHOR}, there are issues with your commit messages in this PR:**
+          if [[ $invalid_commit_messages_count -gt 0 || $missing_issue_number_count -gt 0 ]]; then
+            gh pr comment "$PR_NUMBER" --body "> [!WARNING]
+            > Found $invalid_commit_messages_count commits with invalid a commit message title!
+            > Found $missing_issue_number_count commits with missing issue reference in commit message body!
           
-          $COMMENT_BODY
-          EOF
-            )
-
-            gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
-            exit 1
+            ${comment_body}"
           fi
   check-branch-up-to-date:
     name: "Ensure Branch is Up-to-Date"
     runs-on: ubuntu-latest
+    env:
+      PULL_REQUEST_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -122,10 +92,10 @@ jobs:
 
       - name: "Check if branch is up-to-date"
         run: |
-          BEHIND_COUNT=$(git rev-list --count ${{ github.event.pull_request.head.sha }}..origin/main)
+          BEHIND_COUNT=$(git rev-list --count "$PULL_REQUEST_HEAD_SHA"..origin/main)
           if [ "$BEHIND_COUNT" -gt 0 ]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "> [!WARNING]
-            > **Branch is behind main by $BEHIND_COUNT commits.**
+            gh pr comment "$PR_NUMBER" --body "> [!WARNING]
+            > **Branch is behind main by "$BEHIND_COUNT" commits.**
             Please rebase before merging."
             exit 1
           fi
