@@ -5,6 +5,7 @@ export default defineConfig({
 	test: {
 		include: ['**/*.spec.ts'],
 		globals: true,
+		reporters: ['verbose'],
 	},
 	plugins: [
 		// This is required to build the test files with SWC
