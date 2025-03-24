@@ -5,6 +5,102 @@ Please follow these guidelines to ensure a smooth contribution process.
 
 # Guidelines
 
+# Development Workflow
+
+1. Clone the repository
+
+  ```bash
+  git clone https://github.com/docker-seminar/docker-tutorial.git
+  cd docker-tutorial
+  ```
+
+2. Install dependencies
+  1. Install server dependencies
+     ```bash
+     cd server
+     npm instlal
+     ```
+  2. Install client dependencies
+     TBD
+
+3. Create an issue with `Development Plan` template.
+    ```text
+    title: feat(Server): Support response compression for faster delivery
+    body:
+  
+    # Details
+  
+    Enable response compression (e.g., using `compression` middleware) to reduce payload size for API responses and improve performance for clients.
+  
+    # Todos
+  
+    - [ ] Install compression middleware
+    - [ ] Apply middleware globally in the app
+    - [ ] Add E2E test to verify `Content-Encoding: gzip`
+    - [ ] Update documentation if needed
+  
+    # References
+  
+    - https://docs.nestjs.com/techniques/compression
+    - Issue #58 (related performance discussion)
+    ```
+
+4. Create a branch
+  - Branch name must follow the pattern `<type>/<issue_number>`.
+  - For example, if you're working on issue #58:
+    ```bash
+    git checkout -b feat/42
+    ```
+
+5. **Write code!**
+
+6. [Set up git hooks](#git-hooks)
+
+7. Commit your changes
+
+- Make sure your commit messages follow the conventional commit format: `<type>(<scope>): <description>`
+- [See the validation configuration](../infra/config/validation.yaml) for allowed keywords and scopes.
+- For example: `feat(Server): Enable gzip compression using middleware`
+
+  ```mermaid
+  sequenceDiagram
+    participant Dev as Developer
+    participant CMH as Commit Hook
+    participant PS as parse-title.sh
+    Dev->>CMH: Commit with message
+    CMH->>PS: Validate commit message title
+    PS-->>CMH: Return validation result
+    CMH-->>Dev: Commit allowed or error displayed
+  ```
+
+8. Push your branch
+
+9. Open a Pull Request
+
+- The PR title must follow the same conventional format as commits.
+- Link the issue by referencing in the PR body at the end: `- Close #42`
+
+  ```mermaid
+  sequenceDiagram
+    participant Dev as Developer
+    participant WA as Workflow
+    participant PS as parse-title.sh
+    Dev->>WA: Create/Update Pull Request
+    WA->>PS: Validate PR title
+    PS-->>WA: Return success or error
+    WA->>WA: Post comment with result
+    WA-->>Dev: Workflow completion result
+  ```
+
+10. Wait for review
+
+- Address feedback promptly.
+- Keep PRs small and focused on one task.
+
+11. Once approved, the PR will be merged
+
+- If merge conflicts occur, rebase from `main` branch and resolve them before re-requesting review.
+
 ## Commits
 
 ### Commit Message
