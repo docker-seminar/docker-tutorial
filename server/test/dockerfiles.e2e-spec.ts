@@ -3,7 +3,7 @@ import { App } from 'supertest/types'
 import { Test, TestingModule } from '@nestjs/testing'
 import { describe } from 'vitest'
 import request from 'supertest'
-import { DockerfileModule } from '../src/dockerfile/dockerfile.module'
+import { DockerfilesModule } from '../src/dockerfiles/dockerfiles.module'
 
 describe('Dockerfile API (E2E)', () => {
 	let app: INestApplication<App>
@@ -11,7 +11,7 @@ describe('Dockerfile API (E2E)', () => {
 
 	beforeAll(async () => {
 		const moduleFixture: TestingModule = await Test.createTestingModule({
-			imports: [DockerfileModule],
+			imports: [DockerfilesModule],
 		}).compile()
 
 		app = moduleFixture.createNestApplication()
