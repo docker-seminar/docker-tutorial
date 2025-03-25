@@ -21,7 +21,9 @@ allowed_keywords:
       - Readability
         # For improvements that simplify future updates or maintenance.
       - Maintainability
-    example: "refactor(Performance): Remove unnecessary validation logic"
+    examples:
+      - "refactor(Performance): Remove unnecessary validation logic"
+      - "refactor(Maintainability): Introduce FindDockerfilesDto to clarify the read response structure"
   - name: chore
     description: General maintenance tasks (e.g., dependencies, configs)
     requires_scope: true
@@ -41,7 +43,7 @@ allowed_keywords:
   - name: docs
     description: Documentation updates
     requires_scope: true
-    scopes: [ README, CONTRIBUTING, API ]
+    scopes: [ README, CONTRIBUTING, API, Examples ]
     example: "docs(README): Clarify installation steps"
   - name: test
     description: Add or update tests
