@@ -59,7 +59,26 @@ describe('Dockerfile API (E2E)', () => {
 	})
 
 	describe('GET /dockerfiles/:id/status', () => {
-		it.todo('should return the build status')
+		let dockerfileId: string
+
+		beforeAll(async () => {
+			const res = await request(app.getHttpServer())
+				.post('/dockerfiles')
+				.send({ content: 'FROM alpine\nRUN echo hello' })
+				.expect(202)
+
+			const body = res.body as DockerfileSubmissionResponse
+			dockerfileId = body.id
+		})
+
+		it('should return the build status', async () => {
+			const res = await request(app.getHttpServer()).get(`/dockerfiles/${dockerfileId}/status`).expect(200)
+
+			const { status } = res.body as DockerfileSubmissionResponse
+			expect(res.body).toHaveProperty('id', dockerfileId)
+			expect(typeof status).toBe('string')
+			expect(Object.values(DockerfileStatus)).toContain(status)
+		})
 	})
 
 	describe('GET /dockerfiles', () => {
