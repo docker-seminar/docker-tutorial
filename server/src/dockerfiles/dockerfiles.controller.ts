@@ -2,6 +2,7 @@ import { Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common'
 import { ApiAcceptedResponse } from '@nestjs/swagger'
 import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response'
 import { Response } from 'express'
+import { DockerfileStatus } from './constants/dockerfile-status.enum'
 
 @Controller('dockerfiles')
 export class DockerfilesController {
@@ -12,6 +13,6 @@ export class DockerfilesController {
 		const id = '1'
 
 		res.setHeader('Location', `/dockerfiles/${id}/status`)
-		return { id, status: 'pending' }
+		return { id, status: DockerfileStatus.Pending }
 	}
 }
