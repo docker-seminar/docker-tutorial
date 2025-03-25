@@ -1,4 +1,4 @@
-import { Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common'
+import { Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/common'
 import { ApiAcceptedResponse } from '@nestjs/swagger'
 import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response'
 import { Response } from 'express'
@@ -14,5 +14,10 @@ export class DockerfilesController {
 
 		res.setHeader('Location', `/dockerfiles/${id}/status`)
 		return { id, status: DockerfileStatus.Pending }
+	}
+
+	@Get()
+	findAll() {
+		return [{ id: '1', status: DockerfileStatus.Pending }]
 	}
 }
