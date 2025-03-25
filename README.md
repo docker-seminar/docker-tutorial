@@ -32,6 +32,39 @@ sequenceDiagram
     Svelte (Frontend)-->>User: Displays output and feedback
 ```
 
+# 🛠 Contributing
+
+We welcome contributions from the community!
+
+If you'd like to fix a bug, add a feature, or improve the documentation:
+
+1. **Check out our [Contribution Guidelines](.github/CONTRIBUTING.md)** for detailed instructions on branching,
+   committing, and pull request flow.
+2. Issues and feature plans should start with a GitHub Issue using the *Development Plan* template.
+3. All contributions go through automated validation (commit messages & PR title checks) and manual reviews.
+
+## 🔍 Quick Start
+
+```bash
+git clone https://github.com/docker-seminar/docker-tutorial.git
+cd docker-tutorial
+
+# Install `server/client` dependencies and follow CONTRIBUTING.md
+```
+
+## ✅ Commit Format
+
+We use [Conventional Commits](https://www.conventionalcommits.org/en/about/) to enforce structure and consistency.
+
+Example:
+
+```text
+refactor(Maintainability): Introduce FindDockerfilesDto to clarify the read response structure
+```
+
+> [!NOTE]
+> Git hooks are provided to help you validate commit messages before they're submitted.
+
 # References
 
 - https://github.com/ory/dockertest
