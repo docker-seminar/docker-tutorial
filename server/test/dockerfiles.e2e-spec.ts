@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { describe } from 'vitest'
 import request from 'supertest'
 import { DockerfilesModule } from '../src/dockerfiles/dockerfiles.module'
+import { DockerfileStatus } from '../src/dockerfiles/constants/dockerfile-status.enum'
 
 describe('Dockerfile API (E2E)', () => {
 	let app: INestApplication<App>
@@ -45,6 +46,20 @@ describe('Dockerfile API (E2E)', () => {
 	})
 
 	describe('GET /dockerfiles', () => {
-		it.todo('should return list of submissions')
+		it('should return list of submissions', async () => {
+			const res = await request(app.getHttpServer()).get('/dockerfiles').expect(200)
+
+			expect(Array.isArray(res.body)).toBeTruthy()
+
+			// Array of complete attempts by a user to send a Dockerfile to the server for building or validation.
+			const submissions = res.body as Array<{ id: string; status: string }>
+
+			submissions.forEach(item => {
+				expect(item).toHaveProperty('id')
+				expect(item).toHaveProperty('status')
+				expect(typeof item.id).toBe('string')
+				expect(Object.values(DockerfileStatus)).toContain(item.status)
+			})
+		})
 	})
 })
