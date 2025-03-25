@@ -41,7 +41,7 @@ allowed_keywords:
   - name: docs
     description: Documentation updates
     requires_scope: true
-    scopes: [ README, CONTRIBUTING, API ]
+    scopes: [ README, CONTRIBUTING, API, Examples ]
     example: "docs(README): Clarify installation steps"
   - name: test
     description: Add or update tests
