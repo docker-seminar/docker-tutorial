@@ -2,6 +2,8 @@ import { INestApplication } from '@nestjs/common'
 import { App } from 'supertest/types'
 import { Test, TestingModule } from '@nestjs/testing'
 import { describe } from 'vitest'
+import request from 'supertest'
+import { DockerfileModule } from '../src/dockerfile/dockerfile.module'
 
 describe('Dockerfile API (E2E)', () => {
 	let app: INestApplication<App>
@@ -21,7 +23,17 @@ describe('Dockerfile API (E2E)', () => {
 	})
 
 	describe('POST /dockerfiles', () => {
-		it.todo('should submit a Dockerfile')
+		it('should submit a Dockerfile', async () => {
+			const res = await request(app.getHttpServer())
+				.post('/dockerfiles')
+				.send({ content: 'FROM alpine\nRUN echo hello' })
+				.expect(202)
+
+			expect(res.body).toHaveProperty('id')
+			expect(res.body).toHaveProperty('status')
+			expect(res.headers).toHaveProperty('location')
+			expect(res.headers.location).toMatch(new RegExp(`/dockerfiles/${res.body.id}/status`))
+		})
 	})
 
 	describe('GET /dockerfiles/:id', () => {
