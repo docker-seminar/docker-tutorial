@@ -1,8 +1,9 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/common'
+import { Controller, Get, HttpCode, HttpStatus, Param, Post, Res } from '@nestjs/common'
 import { ApiAcceptedResponse } from '@nestjs/swagger'
 import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response'
 import { Response } from 'express'
 import { DockerfileStatus } from './constants/dockerfile-status.enum'
+import { FindDockerfileResponseDto } from './dto/find-dockerfile.response'
 
 @Controller('dockerfiles')
 export class DockerfilesController {
@@ -19,5 +20,10 @@ export class DockerfilesController {
 	@Get()
 	findAll(): FindDockerfileResponseDto[] {
 		return [{ id: '1', status: DockerfileStatus.Pending }]
+	}
+
+	@Get(':id')
+	findOne(@Param('id') id: string): FindDockerfileResponseDto {
+		return { id, status: DockerfileStatus.Pending }
 	}
 }
