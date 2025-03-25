@@ -4,6 +4,7 @@ import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response'
 import { Response } from 'express'
 import { DockerfileStatus } from './constants/dockerfile-status.enum'
 import { FindDockerfileResponseDto } from './dto/find-dockerfile.response'
+import { DockerfileStatusResponseDto } from './dto/dockerfile-status.response'
 
 @Controller('dockerfiles')
 export class DockerfilesController {
@@ -24,6 +25,11 @@ export class DockerfilesController {
 
 	@Get(':id')
 	findOne(@Param('id') id: string): FindDockerfileResponseDto {
+		return { id, status: DockerfileStatus.Pending }
+	}
+
+	@Get(':id/status')
+	getStatus(@Param('id') id: string): DockerfileStatusResponseDto {
 		return { id, status: DockerfileStatus.Pending }
 	}
 }
