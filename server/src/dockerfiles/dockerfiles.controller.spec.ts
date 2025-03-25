@@ -53,8 +53,4 @@ describe('DockerfilesController', () => {
 			expect(result).toEqual({ id, status: DockerfileStatus.Pending })
 		})
 	})
-
-	it('should be defined', () => {
-		expect(controller).toBeDefined()
-	})
 })
