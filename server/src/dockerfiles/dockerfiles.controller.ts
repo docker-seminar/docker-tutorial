@@ -17,7 +17,7 @@ export class DockerfilesController {
 	}
 
 	@Get()
-	findAll() {
+	findAll(): FindDockerfileResponseDto[] {
 		return [{ id: '1', status: DockerfileStatus.Pending }]
 	}
 }
