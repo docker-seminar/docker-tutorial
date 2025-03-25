@@ -5,10 +5,10 @@ import { describe } from 'vitest'
 import request from 'supertest'
 import { DockerfilesModule } from '../src/dockerfiles/dockerfiles.module'
 import { DockerfileStatus } from '../src/dockerfiles/constants/dockerfile-status.enum'
+import { DockerfileSubmissionResponse } from './types/dockerfile-submission-response'
 
 describe('Dockerfile API (E2E)', () => {
 	let app: INestApplication<App>
-	let dockerfileId: string
 
 	beforeAll(async () => {
 		const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -38,7 +38,24 @@ describe('Dockerfile API (E2E)', () => {
 	})
 
 	describe('GET /dockerfiles/:id', () => {
-		it.todo('should return a Dockerfile result')
+		let dockerfileId: string
+
+		beforeAll(async () => {
+			const res = await request(app.getHttpServer())
+				.post('/dockerfiles')
+				.send({ content: 'FROM alpine\nRUN echo hello' })
+				.expect(202)
+
+			const body = res.body as DockerfileSubmissionResponse
+			dockerfileId = body.id
+		})
+		it('should return a Dockerfile result', async () => {
+			const res = await request(app.getHttpServer()).get(`/dockerfiles/${dockerfileId}`).expect(200)
+			const { status } = res.body as DockerfileSubmissionResponse
+			expect(res.body).toHaveProperty('id', dockerfileId)
+			expect(res.body).toHaveProperty('status')
+			expect(typeof status).toBe('string')
+		})
 	})
 
 	describe('GET /dockerfiles/:id/status', () => {
