@@ -1,10 +1,10 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, Post, Res } from '@nestjs/common'
 import { ApiAcceptedResponse, ApiOkResponse } from '@nestjs/swagger'
-import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response'
+import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response.dto'
 import { Response } from 'express'
 import { DockerfileStatus } from './constants/dockerfile-status.enum'
-import { FindDockerfileResponseDto } from './dto/find-dockerfile.response'
-import { DockerfileStatusResponseDto } from './dto/dockerfile-status.response'
+import { FindDockerfileResponseDto } from './dto/find-dockerfile.response.dto'
+import { DockerfileStatusResponseDto } from './dto/dockerfile-status.response.dto'
 
 @Controller('dockerfiles')
 export class DockerfilesController {
@@ -45,7 +45,7 @@ export class DockerfilesController {
 
 	@Get(':id/status')
 	@ApiOkResponse({
-		type: FindDockerfileResponseDto,
+		type: DockerfileStatusResponseDto,
 	})
 	getStatus(@Param('id') id: string): DockerfileStatusResponseDto {
 		return { id, status: DockerfileStatus.Pending }
