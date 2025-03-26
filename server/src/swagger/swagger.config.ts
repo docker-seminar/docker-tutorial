@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import metadata from '../metadata'
 
 /**
  * Sets up Swagger (OpenAPI) documentation for the application.
@@ -20,7 +21,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
  *     await app.listen(3000)
  * }
  */
-export function setupSwagger(app: INestApplication) {
+export async function setupSwagger(app: INestApplication) {
 	const documentBuilderConfig = new DocumentBuilder()
 		.setTitle('Docker Tutorial')
 		.setDescription('The Docker Tutorial API description.')
@@ -29,6 +30,7 @@ export function setupSwagger(app: INestApplication) {
 		.setVersion('0.0.0')
 		.build()
 
+	await SwaggerModule.loadPluginMetadata(metadata)
 	const documentFactory = () =>
 		SwaggerModule.createDocument(app, documentBuilderConfig, {
 			autoTagControllers: true,
