@@ -10,7 +10,16 @@ import { DockerfileStatusResponseDto } from './dto/dockerfile-status.response'
 export class DockerfilesController {
 	@Post()
 	@HttpCode(HttpStatus.ACCEPTED)
-	@ApiAcceptedResponse({ type: CreateDockerfileResponseDto })
+	@ApiAcceptedResponse({
+		type: CreateDockerfileResponseDto,
+		headers: {
+			Location: {
+				description: 'URL to check the build status of the submitted Dockerfile',
+				// Todo: Update example value when submission ID becomes UUID.
+				schema: { type: 'string', format: 'uri', example: '/dockerfiles/1/status' },
+			},
+		},
+	})
 	create(@Res({ passthrough: true }) res: Response): CreateDockerfileResponseDto {
 		const id = '1'
 
