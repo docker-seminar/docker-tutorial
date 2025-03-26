@@ -10,6 +10,7 @@
       "options": {
         "swcrcPath": "./infra/.swcrc"
       }
-    }
+    },
+    "typeCheck": true
   }
 }
