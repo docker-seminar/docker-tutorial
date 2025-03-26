@@ -1,10 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { DockerfileStatus } from '../constants/dockerfile-status.enum'
+import { DockerfileBaseResponseDto } from './dockerfile-base.response.dto'
 
-export class DockerfileStatusResponseDto {
-	@ApiProperty()
-	id: string
-
-	@ApiProperty({ enum: DockerfileStatus, enumName: 'DockerfileStatus' })
-	status: DockerfileStatus
-}
+export class DockerfileStatusResponseDto extends DockerfileBaseResponseDto {}
