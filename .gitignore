@@ -2,3 +2,4 @@ node_modules
 dist
 coverage
 .vite
+server/src/metadata.ts
