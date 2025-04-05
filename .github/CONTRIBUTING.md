@@ -127,6 +127,18 @@ This repository uses Git hooks to enforce commit message conventions and other c
 You must enable them manually before contributing.
 For setup instructions, refer to [README.md](../infra/git/hooks/README.md).
 
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant CMH as Commit Hook
+    participant PS as parse-title.sh
+    Dev->>CMH: Commit with message
+    CMH->>PS: Validate commit message title
+    PS-->>CMH: Return validation result
+    CMH-->>Dev: Commit allowed or error displayed
+```
+
+
 ## Pull Request
 
 - Create **small and focused PRs** to keep the review process efficient.
@@ -134,13 +146,25 @@ For setup instructions, refer to [README.md](../infra/git/hooks/README.md).
 - Link to any related issues in the PR description.
 - Ensure the build and tests pass before requesting a review.
 
+```mermaid
+sequenceDiagram
+participant Dev as Developer
+participant WA as Workflow
+participant PS as parse-title.sh
+Dev->>WA: Create/Update Pull Request
+WA->>PS: Validate PR title
+PS-->>WA: Return success or error
+WA->>WA: Post comment with result
+WA-->>Dev: Workflow completion result
+```
+
 ## Code Style & Linting
 
 [//]: # (TODO: TBD)
 
 ## Testing
 
-[//]: # (TODO: TBD)
+[//]: # (TODO: TBD) 
 
 ## Security Considerations
 
