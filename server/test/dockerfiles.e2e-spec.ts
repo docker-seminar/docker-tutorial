@@ -30,10 +30,11 @@ describe('Dockerfile API (E2E)', () => {
 				.send({ content: 'FROM alpine\nRUN echo hello' })
 				.expect(202)
 
+			const body = res.body as DockerfileSubmissionResponse
 			expect(res.body).toHaveProperty('id')
 			expect(res.body).toHaveProperty('status')
 			expect(res.headers).toHaveProperty('location')
-			expect(res.headers.location).toMatch(new RegExp(`/dockerfiles/${res.body.id}/status`))
+			expect(res.headers.location).toMatch(new RegExp(`/dockerfiles/${body.id}/status`))
 		})
 	})
 

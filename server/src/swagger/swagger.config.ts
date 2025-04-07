@@ -1,6 +1,25 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
+/**
+ * Sets up Swagger (OpenAPI) documentation for the application.
+ *
+ * This will register the `/api` endpoint where Swagger UI will be available.
+ * The documentation includes metadata like title, description, version and contact.
+ *
+ * @param app - The NestJS application instance
+ *
+ * @example
+ * import { setupSwagger } from './swagger'
+ * import { NestFactory } from '@nestjs/core'
+ * import { AppModule } from './app.module'
+ *
+ * async function bootstrap() {
+ *     const app = await NestFactory.create(AppModule)
+ *     setupSwagger(app)
+ *     await app.listen(3000)
+ * }
+ */
 export function setupSwagger(app: INestApplication) {
 	const documentBuilderConfig = new DocumentBuilder()
 		.setTitle('Docker Tutorial')

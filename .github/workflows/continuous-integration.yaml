@@ -141,6 +141,6 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Check code style with Prettier
+      - name: Check code style with ESLint
         working-directory: server
-        run: npm run format:check
+        run: npm run lint:check
