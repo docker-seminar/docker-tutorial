@@ -43,8 +43,13 @@ allowed_keywords:
   - name: docs
     description: Documentation updates
     requires_scope: true
-    scopes: [ README, CONTRIBUTING, API, Examples ]
-    example: "docs(README): Clarify installation steps"
+    scopes: [ README, CONTRIBUTING, API, Examples, JSDoc ]
+    examples:
+      README: "docs(README): Clarify installation steps"
+      CONTRIBUTING: "docs(CONTRIBUTING): Add guideline for @example usage in utility functions"
+      API: "docs(API): Document setupSwagger with example usage"
+      Examples: "docs(Examples): Add usage sample for toMarkdownList"
+      JSDoc: "docs(JSDoc): Add param and example tags to bootstrap function"
   - name: test
     description: Add or update tests
     requires_scope: true
