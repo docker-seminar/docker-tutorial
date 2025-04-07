@@ -28,10 +28,23 @@ export default tseslint.config(
 		},
 	},
 	{
+		plugins: { jsdoc },
 		rules: {
 			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/no-floating-promises': 'warn',
 			'@typescript-eslint/no-unsafe-argument': 'warn',
+			'jsdoc/require-example': [
+				'warn',
+				{
+					contexts: [
+						// Only warn for standalone functions, not methods
+						'FunctionDeclaration:not([parent.type="MethodDefinition"])',
+						'ArrowFunctionExpression[async=false][generator=false]',
+					],
+				},
+			],
+			'jsdoc/no-blank-block-descriptions': 'warn',
+			'jsdoc/tag-lines': 'off',
 		},
 	}
 )
