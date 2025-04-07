@@ -164,7 +164,7 @@ WA-->>Dev: Workflow completion result
 
 ## Testing
 
-[//]: # (TODO: TBD) 
+[//]: # (TODO: TBD)
 
 ## Security Considerations
 
@@ -177,4 +177,33 @@ WA-->>Dev: Workflow completion result
 - If your change affects usage, update `README.md` or any relevant documentation.
 - Ensure all example commands and descriptions are up to date.
 
+# Code Style
 
+## Comments
+
+## Examples
+
+- When writing utility or helper functions, include an `@example` tag in the JSDoc to demonstrate how the function is
+  used.
+- This improves clarity and helps contributors understand the expected input/output at a glance.
+- For trivial methods inside classes (such as in controllers or services) where usage is already clear, the `@example`
+  tag is **not** required.
+
+```ts
+/**
+ * Converts a JavaScript object into a Markdown-formatted bullet list.
+ *
+ * @param obj - The object to convert.
+ * @returns Markdown-formatted string.
+ *
+ * @example
+ * const data = { foo: "bar", count: 1 }
+ * console.log(toMarkdownList(data))
+ * // - foo: bar
+ * // - count: 1
+ */
+function toMarkdownList(obj: Record<string, any>): string {
+  return Object.entries(obj)
+    .map(([key, value]) => `- ${key}: ${value}`)
+    .join('\n')
+}
