@@ -7,7 +7,7 @@ allowed_keywords:
   - name: fix
     description: Fix a bug.
     requires_scope: true
-    scopes: [ Database ]
+    scopes: [ Database, Code ]
     example: "fix(Database): Resolve connection timeout issue"
   - name: refactor
     description: Improve existing code without changing functionality.

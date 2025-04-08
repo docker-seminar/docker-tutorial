@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response'
-import { FindDockerfileResponseDto } from './dto/find-dockerfile.response'
-import { DockerfileStatusResponseDto } from './dto/dockerfile-status.response'
+import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response.dto'
+import { FindDockerfileResponseDto } from './dto/find-dockerfile.response.dto'
+import { DockerfileStatusResponseDto } from './dto/dockerfile-status.response.dto'
 import { DockerfileStatus } from './constants/dockerfile-status.enum'
 
 @Injectable()
