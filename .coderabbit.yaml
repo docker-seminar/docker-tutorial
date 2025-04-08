@@ -5,3 +5,5 @@ reviews:
   path_filters:
     - '!.idea/**'
     - '!.gitignore'
+    - '!.metadata.ts'
+
