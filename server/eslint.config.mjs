@@ -46,5 +46,11 @@ export default tseslint.config(
 			'jsdoc/no-blank-block-descriptions': 'warn',
 			'jsdoc/tag-lines': 'off',
 		},
+	},
+	{
+		files: ["**/*.spec.ts", "**/*.test.ts"],
+		rules: {
+			"@typescript-eslint/unbound-method": "off"
+		}
 	}
 )
