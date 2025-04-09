@@ -2,12 +2,14 @@ import { Controller, Get, HttpCode, HttpStatus, Param, Post, Res } from '@nestjs
 import { ApiAcceptedResponse, ApiOkResponse } from '@nestjs/swagger'
 import { CreateDockerfileResponseDto } from './dto/create-dockerfile.response.dto'
 import { Response } from 'express'
-import { DockerfileStatus } from './constants/dockerfile-status.enum'
 import { FindDockerfileResponseDto } from './dto/find-dockerfile.response.dto'
 import { DockerfileStatusResponseDto } from './dto/dockerfile-status.response.dto'
+import { DockerfilesService } from './dockerfiles.service'
 
 @Controller('dockerfiles')
 export class DockerfilesController {
+	constructor(private readonly dockerfilesService: DockerfilesService) {}
+
 	@Post()
 	@HttpCode(HttpStatus.ACCEPTED)
 	@ApiAcceptedResponse({
@@ -21,10 +23,10 @@ export class DockerfilesController {
 		},
 	})
 	create(@Res({ passthrough: true }) res: Response): CreateDockerfileResponseDto {
-		const id = '1'
+		const result = this.dockerfilesService.create()
 
-		res.setHeader('Location', `/dockerfiles/${id}/status`)
-		return { id, status: DockerfileStatus.Pending }
+		res.setHeader('Location', `/dockerfiles/${result.id}/status`)
+		return result
 	}
 
 	@Get()
@@ -32,7 +34,7 @@ export class DockerfilesController {
 		type: FindDockerfileResponseDto,
 	})
 	findAll(): FindDockerfileResponseDto[] {
-		return [{ id: '1', status: DockerfileStatus.Pending }]
+		return this.dockerfilesService.findAll()
 	}
 
 	@Get(':id')
@@ -40,7 +42,7 @@ export class DockerfilesController {
 		type: FindDockerfileResponseDto,
 	})
 	findOne(@Param('id') id: string): FindDockerfileResponseDto {
-		return { id, status: DockerfileStatus.Pending }
+		return this.dockerfilesService.findOne(id)
 	}
 
 	@Get(':id/status')
@@ -48,6 +50,6 @@ export class DockerfilesController {
 		type: DockerfileStatusResponseDto,
 	})
 	getStatus(@Param('id') id: string): DockerfileStatusResponseDto {
-		return { id, status: DockerfileStatus.Pending }
+		return this.dockerfilesService.getStatus(id)
 	}
 }
