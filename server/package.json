@@ -18,11 +18,13 @@
     "test": "vitest --config ./infra/vite.config.ts",
     "test:watch": "vitest --config ./infra/vite.config.ts --watch",
     "test:cov": "vitest --config ./infra/vite.config.ts --coverage",
+    "test:bench": "vitest bench --config ./infra/vite.config.ts",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "vitest --config test/vite.config.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.0.7",
