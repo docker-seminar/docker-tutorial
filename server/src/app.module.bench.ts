@@ -1,8 +1,23 @@
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test } from '@nestjs/testing'
+import { bench } from 'vitest'
 
 let cachedService: ConfigService
 let uncachedService: ConfigService
+
+beforeAll(async () => {
+	await setupServices()
+})
+
+describe('AppModule', () => {
+	bench('with cache', () => {
+		cachedService.get('NODE_ENV')
+	})
+
+	bench('without cache', () => {
+		uncachedService.get('NODE_ENV')
+	})
+})
 
 /**
  * Bootstraps two independent NestJS modules for benchmarking:
@@ -21,7 +36,7 @@ async function setupServices() {
 
 	const cachedModule = await Test.createTestingModule({
 		imports: [
-			ConfigModule.forRoot({
+			await ConfigModule.forRoot({
 				cache: true,
 			}),
 		],
@@ -29,7 +44,7 @@ async function setupServices() {
 
 	const uncachedModule = await Test.createTestingModule({
 		imports: [
-			ConfigModule.forRoot({
+			await ConfigModule.forRoot({
 				cache: false,
 			}),
 		],
