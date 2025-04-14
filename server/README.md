@@ -106,3 +106,45 @@ you'd like to join them, please [read more here](https://docs.nestjs.com/support
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+# Project Highlights
+
+## Test-Driven Development (TDD)
+
+This project follows a TDD workflow to ensure confidence and maintainability of features.
+Each implementation begins with a failing test that defines expected behavior.
+This includes:
+
+- Unit tests for validating internal logic.
+- Integration tests for verifying module.
+- Benchmark tests for measuring performance-critical code.
+
+### Benchmark Testing with Vitest
+
+Some behaviors, such as performance gains from caching, are not reliably testable through unit tests.
+In these cases, benchmark testing serves as a practical alternative for verifying performance expectations.
+
+For example, accessing environment variable via `process.env` can be slow.
+NestJS's `ConfigModule` supports caching to mitigate this.
+Since internal caching behavior cannot be directly tested through unit tests,
+a benchmark test was introduced to confirm the performance benefit of enabling caching.
+
+```bash
+$ npm run test:bench
+```
+
+Sample output:
+
+```text
+ ✓ src/app.module.bench.ts > AppModule 3147ms
+     name                     hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · with cache     9,644,951.84  0.0000  0.1722  0.0001  0.0001  0.0001  0.0002  0.0003  ±0.24%  4822477   fastest
+   · without cache  4,176,267.41  0.0001  0.2447  0.0002  0.0003  0.0003  0.0003  0.0005  ±0.32%  2088134
+
+ BENCH  Summary
+
+  with cache - src/app.module.bench.ts > AppModule
+    2.31x faster than without cache
+
+ PASS
+```
