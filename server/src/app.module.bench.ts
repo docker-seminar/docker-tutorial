@@ -1,3 +1,5 @@
+// noinspection ES6MissingAwait
+
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test } from '@nestjs/testing'
 import { bench } from 'vitest'
@@ -36,7 +38,7 @@ async function setupServices() {
 
 	const cachedModule = await Test.createTestingModule({
 		imports: [
-			await ConfigModule.forRoot({
+			ConfigModule.forRoot({
 				cache: true,
 			}),
 		],
@@ -44,7 +46,7 @@ async function setupServices() {
 
 	const uncachedModule = await Test.createTestingModule({
 		imports: [
-			await ConfigModule.forRoot({
+			ConfigModule.forRoot({
 				cache: false,
 			}),
 		],
