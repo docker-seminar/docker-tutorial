@@ -3,27 +3,28 @@ allowed_keywords:
     description: Introduce a new feature.
     requires_scope: true
     scopes: [ Server, Config ]
-    example: "feat(Config): Add dynamic environment variable loading"
+    examples:
+      - "feat(Config): Add dynamic environment variable loading"
+
   - name: fix
     description: Fix a bug.
     requires_scope: true
-    scopes: [ Database ]
-    example: "fix(Database): Resolve connection timeout issue"
+    scopes: [ Database, Code ]
+    examples:
+      - "fix(Database): Resolve connection timeout issue"
+
   - name: refactor
     description: Improve existing code without changing functionality.
     requires_scope: true
     scopes:
-        # For changes that optimize speed or resource usage.
-      - Performance
-        # For changes that improve the structure or separation of concerns.
-      - Modularity
-        # When refactoring to make the code easier to understand.
-      - Readability
-        # For improvements that simplify future updates or maintenance.
-      - Maintainability
+      - Performance     # For changes that optimize speed or resource usage.
+      - Modularity      # For changes that improve structure/separation of concerns.
+      - Readability     # When refactoring to improve clarity.
+      - Maintainability # For improvements that simplify future maintenance.
     examples:
       - "refactor(Performance): Remove unnecessary validation logic"
       - "refactor(Maintainability): Introduce FindDockerfilesDto to clarify the read response structure"
+
   - name: chore
     description: General maintenance tasks (e.g., dependencies, configs)
     requires_scope: true
@@ -31,42 +32,53 @@ allowed_keywords:
       - Dependencies
       - Configs
       - gitignore
-      # When Changing scripts in package.json
-      - Script
+      - Script          # When changing scripts in package.json
       - Lint
-    example: "chore(Dependencies): Bump TypeScript version"
+    examples:
+      - "chore(Dependencies): Bump TypeScript version"
+
   - name: infra
     description: Infrastructure-related changes (e.g., CI/CD, Cloud)
     requires_scope: true
     scopes: [ CI, CD, CloudFormation ]
-    example: "infra(CI): Validate PR title before merging"
+    examples:
+      - "infra(CI): Validate PR title before merging"
+
   - name: docs
     description: Documentation updates
     requires_scope: true
     scopes: [ README, CONTRIBUTING, API, Examples, JSDoc ]
     examples:
-      README: "docs(README): Clarify installation steps"
-      CONTRIBUTING: "docs(CONTRIBUTING): Add guideline for @example usage in utility functions"
-      API: "docs(API): Document setupSwagger with example usage"
-      Examples: "docs(Examples): Add usage sample for toMarkdownList"
-      JSDoc: "docs(JSDoc): Add param and example tags to bootstrap function"
+      - "docs(README): Clarify installation steps"
+      - "docs(CONTRIBUTING): Add guideline for @example usage in utility functions"
+      - "docs(API): Document setupSwagger with example usage"
+      - "docs(Examples): Add usage sample for toMarkdownList"
+      - "docs(JSDoc): Add param and example tags to bootstrap function"
+
   - name: test
     description: Add or update tests
     requires_scope: true
     scopes: [ Unit, Integration, E2E ]
-    example: "test(Unit): Add tests for validation service"
+    examples:
+      - "test(Unit): Add tests for validation service"
+
   - name: style
     description: Code style changes (e.g., formatting, linting)
     requires_scope: false
     scopes: [ ]
-    example: "style: Apply Prettier auto-formatting"
+    examples:
+      - "style: Apply Prettier auto-formatting"
+
   - name: revert
-    description: "Revert a previous commit"
+    description: Revert a previous commit
     requires_scope: false
     scopes: [ ]
-    example: "revert: 'fix(Database): Resolve connection timeout issue'"
+    examples:
+      - "revert: 'fix(Database): Resolve connection timeout issue'"
+
   - name: remove
     description: Remove deprecated or unnecessary code, files, or features.
     requires_scope: true
     scopes: [ Code, Files, Feature ]
-    example: "remove(Code): Delete obsolete authentication module"
+    examples:
+      - "remove(Code): Delete obsolete authentication module"
