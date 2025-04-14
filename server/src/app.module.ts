@@ -5,7 +5,12 @@ import { DockerfilesModule } from './dockerfiles/dockerfiles.module'
 import { ConfigModule } from '@nestjs/config'
 
 @Module({
-	imports: [ConfigModule.forRoot(), DockerfilesModule],
+	imports: [
+		ConfigModule.forRoot({
+			ignoreEnvFile: true,
+		}),
+		DockerfilesModule,
+	],
 	controllers: [AppController],
 	providers: [AppService],
 })
