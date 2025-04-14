@@ -58,9 +58,12 @@ allowed_keywords:
   - name: test
     description: Add or update tests
     requires_scope: true
-    scopes: [ Unit, Integration, E2E ]
+    scopes: [ Unit, Integration, E2E, Benchmark ]
     examples:
       - "test(Unit): Add tests for validation service"
+      - "test(Integration): Verify payment flow between modules"
+      - "test(E2E): Add login scenario for user session"
+      - "test(Benchmark): Compare ConfigService performance with and without cache"
 
   - name: style
     description: Code style changes (e.g., formatting, linting)
