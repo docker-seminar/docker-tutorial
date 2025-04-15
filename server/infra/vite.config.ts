@@ -1,16 +1,16 @@
 import { defineConfig } from 'vitest/config'
 import swc from 'unplugin-swc'
 
+const isGitHubActions = process.env.GITHUB_ACTIONS === 'true'
+
 export default defineConfig({
 	test: {
 		include: ['**/*.spec.ts'],
 		globals: true,
-		reporters: ['verbose'],
+		reporters: isGitHubActions ? ['verbose', 'github-actions'] : ['verbose'],
 	},
 	plugins: [
-		// This is required to build the test files with SWC
 		swc.vite({
-			// Explicitly set the module type to avoid inheriting this value from a `.swcrc`
 			module: { type: 'es6' },
 		}),
 	],
