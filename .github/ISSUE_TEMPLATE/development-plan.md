@@ -6,14 +6,12 @@ labels: enhancement, minor
 assignees: kimseungbin
 ---
 
-# Details
+## 💡 Details
 
--
-
-# Todos
+## ✅ Todos
 
 - [ ] Todo
 
-# References
+## References
 
 - 
