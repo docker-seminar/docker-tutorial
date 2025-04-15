@@ -35,10 +35,10 @@ allowed_keywords:
       - Script          # When changing scripts in package.json
       - Lint
       - GitHub
-examples:
-  - "chore(Dependencies): Bump TypeScript version"
-  - "chore(GitHub): Update issue template with new format and examples"
-  - "chore(GitHub): Refactor PR template to align with commit conventions"
+    examples:
+      - "chore(Dependencies): Bump TypeScript version"
+      - "chore(GitHub): Update issue template with new format and examples"
+      - "chore(GitHub): Refactor PR template to align with commit conventions"
 
   - name: infra
     description: Infrastructure-related changes (e.g., CI/CD, Cloud)
