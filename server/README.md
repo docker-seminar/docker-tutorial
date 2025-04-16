@@ -135,6 +135,10 @@ This includes:
 - Integration tests for verifying module.
 - Benchmark tests for measuring performance-critical code.
 
+> [!TIP]
+> Developers can run `npm run test:preview` to launch the **interactive Vitest UI**, view test results in real-time, and
+> explore line-by-line code coverage in the browser.
+
 #### Benchmark Testing with Vitest
 
 Some behaviors, such as performance gains from caching, are not reliably testable through unit tests.
