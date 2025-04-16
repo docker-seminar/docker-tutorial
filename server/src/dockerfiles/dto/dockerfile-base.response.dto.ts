@@ -12,6 +12,9 @@ export abstract class DockerfileBaseResponseDto {
 	 */
 	id: string
 
+	@ApiProperty({
+		enum: DockerfileStatus,
+	})
 	/**
 	 * Current processing state of the Dockerfile.
 	 */
