@@ -107,6 +107,22 @@ you'd like to join them, please [read more here](https://docs.nestjs.com/support
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
+## 🧑‍💻 Developer Experience
+
+This project aims to provide **modern and enjoyable developer experience**, with features that support testing,
+documentation, and inspection—both locally and via CI/CD.
+
+All test results and documentation are eventually deployed as static assets though **GitHub Pages**,
+making it easy to review and share without cloning the repository or running the app locally.
+
+### 🔗 GitHub Pages
+
+The following resources are available via GitHub Pages:
+
+1. [Vitest UI—Test Results & Coverage](https://docker-seminar.github.io/docker-tutorial/test)
+
+- View the latest automated test runs and coverage reports.
+
 # Project Highlights
 
 ## Test-Driven Development (TDD)
