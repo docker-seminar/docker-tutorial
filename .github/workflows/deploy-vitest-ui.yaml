@@ -30,6 +30,7 @@ jobs:
         run: npm install
 
       - name: Build Vitest UI
+        working-directory: server
         run: npm run test:preview
 
       - name: Setup Pages
