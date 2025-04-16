@@ -123,9 +123,9 @@ The following resources are available via GitHub Pages:
 
 - View the latest automated test runs and coverage reports.
 
-# Project Highlights
+## Project Highlights
 
-## Test-Driven Development (TDD)
+### Test-Driven Development (TDD)
 
 This project follows a TDD workflow to ensure confidence and maintainability of features.
 Each implementation begins with a failing test that defines expected behavior.
@@ -135,7 +135,7 @@ This includes:
 - Integration tests for verifying module.
 - Benchmark tests for measuring performance-critical code.
 
-### Benchmark Testing with Vitest
+#### Benchmark Testing with Vitest
 
 Some behaviors, such as performance gains from caching, are not reliably testable through unit tests.
 In these cases, benchmark testing serves as a practical alternative for verifying performance expectations.
