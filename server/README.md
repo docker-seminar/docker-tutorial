@@ -107,9 +107,25 @@ you'd like to join them, please [read more here](https://docs.nestjs.com/support
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
-# Project Highlights
+## 🧑‍💻 Developer Experience
 
-## Test-Driven Development (TDD)
+This project aims to provide a **modern and enjoyable developer experience**, with features that support testing,
+documentation, and inspection—both locally and via CI/CD.
+
+All test results and documentation are eventually deployed as static assets though **GitHub Pages**,
+making it easy to review and share without cloning the repository or running the app locally.
+
+### 🔗 GitHub Pages
+
+The following resources are available via GitHub Pages:
+
+1. [Vitest UI—Test Results & Coverage](https://docker-seminar.github.io/docker-tutorial/test)
+
+- View the latest automated test runs and coverage reports.
+
+## Project Highlights
+
+### Test-Driven Development (TDD)
 
 This project follows a TDD workflow to ensure confidence and maintainability of features.
 Each implementation begins with a failing test that defines expected behavior.
@@ -119,7 +135,11 @@ This includes:
 - Integration tests for verifying module.
 - Benchmark tests for measuring performance-critical code.
 
-### Benchmark Testing with Vitest
+> [!TIP]
+> Developers can run `npm run test:preview` to launch the **interactive Vitest UI**, view test results in real-time, and
+> explore line-by-line code coverage in the browser.
+
+#### Benchmark Testing with Vitest
 
 Some behaviors, such as performance gains from caching, are not reliably testable through unit tests.
 In these cases, benchmark testing serves as a practical alternative for verifying performance expectations.

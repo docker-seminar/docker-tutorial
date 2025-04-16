@@ -1,6 +1,11 @@
+import { dirname, resolve } from 'node:path'
+import { mkdirSync, writeFileSync } from 'node:fs'
+
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import metadata from '../metadata'
+
+const isGitHubActions = process.env.GITHUB_ACTIONS === 'true'
 
 /**
  * Sets up Swagger (OpenAPI) documentation for the application.
@@ -36,4 +41,11 @@ export async function setupSwagger(app: INestApplication) {
 			autoTagControllers: true,
 		})
 	SwaggerModule.setup('api', app, documentFactory)
+
+	if (isGitHubActions) {
+		const document = documentFactory()
+		const outputPath = resolve(__dirname, '../../html/api/openapi.json')
+		mkdirSync(dirname(outputPath), { recursive: true })
+		writeFileSync(outputPath, JSON.stringify(document, null, 2), { encoding: 'utf-8' })
+	}
 }
