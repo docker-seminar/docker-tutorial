@@ -21,7 +21,7 @@
     "test:bench": "vitest bench --config ./infra/vite.config.ts",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "vitest --config test/vite.config.ts",
-    "test:preview": "vitest --config ./infra/vite.config.ts --coverage --ui --outDir ./html/test",
+    "test:preview": "vitest --config ./infra/vite.config.ts --coverage --ui --outputFile ./html/test",
     "docs:openapi": "npx tsx scripts/generate-openapi.ts"
   },
   "dependencies": {
