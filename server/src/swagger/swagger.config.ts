@@ -1,5 +1,5 @@
-import { dirname, resolve } from 'path'
-import { mkdirSync, writeFileSync } from 'fs'
+import { dirname, resolve } from 'node:path'
+import { mkdirSync, writeFileSync } from 'node:fs'
 
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
