@@ -1,4 +1,4 @@
-name: Deploy Docs to GitHub Pages
+name: Deploy Vitest UI to GitHub Pages
 
 on:
   push:
@@ -32,14 +32,6 @@ jobs:
       - name: Build Vitest UI
         working-directory: server
         run: npm run test:preview
-
-      - name: Generate OpenAPI JSON
-        working-directory: server
-        run: npm run docs:openapi
-
-      - name: Bundle OpenAPI with Redoc
-        working-directory: server
-        run: npx redoc-cli bundle html/api/openapi.json --output html/api/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
