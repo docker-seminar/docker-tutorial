@@ -109,7 +109,7 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 ## 🧑‍💻 Developer Experience
 
-This project aims to provide **modern and enjoyable developer experience**, with features that support testing,
+This project aims to provide a **modern and enjoyable developer experience**, with features that support testing,
 documentation, and inspection—both locally and via CI/CD.
 
 All test results and documentation are eventually deployed as static assets though **GitHub Pages**,
